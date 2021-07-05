@@ -26,7 +26,8 @@ export default {
   components: {},
   data() {
     return {
-      liveScreen: null,
+      platform: this.$store.getters.getPlatform,
+      liveScreen: this.$store.getters.getLiveScreen,
       // 通过canvasStyle控制canvas的实际大小
       swipeBegin: null,
       swipeEnd: null,
@@ -69,9 +70,10 @@ export default {
     this.python.canvas = this.canvas
   },
   watch: {
-    // '$store.state.platform': function () {
-    //   this.platform = this.$store.getters.getPlatform
-    // },
+    '$store.state.platform': function () {
+      console.log(this.$store.getters.getPlatform)
+      this.platform = this.$store.getters.getPlatform
+    },
     // '$store.state.loading': function () {
     //   this.loading = this.$store.getters.getLoading
     // },
@@ -88,7 +90,7 @@ export default {
       this.drawBlobImageToScreen(this.$store.getters.getImgBlob)
     },
     "$store.state.liveScreen": function () {
-      console.log("live change")
+      this.liveScreen = this.$store.getters.getLiveScreen
       if (this.$store.getters.getLiveScreen) {
         if (this.$store.getters.getPlatform === "Android") {
           this.loadLiveScreen()
@@ -101,6 +103,9 @@ export default {
         }
         this.drawBlobImageToScreen(this.$store.getters.getImgBlob)
       }
+    },
+    "$store.state.iosScreenUrl": function () {
+      this.iosLiveScreen()
     }
   },
   computed: {
@@ -109,9 +114,6 @@ export default {
     },
     deviceUrl() {
       return this.$store.getters.getDeviceUrl
-    },
-    platform() {
-      return this.$store.getters.getPlatform
     },
     nodeSelected() {
       return this.$store.getters.getNodeSelected
@@ -206,7 +208,7 @@ export default {
     // iOS live screen
     iosLiveScreen: function () {
       const img = document.getElementById('canvas-bg-ios')
-      img.src = this.$store.getters.getIosScreenUrl + '?random=' + Math.random()
+      img.src = this.$store.getters.getIosScreenUrl
       this.resizeScreen(img)
     },
     doKeyEvent(data) {

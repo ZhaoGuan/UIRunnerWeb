@@ -16,6 +16,7 @@ const store = new Vuex.Store({
         deviceId: null,
         serial: localStorage.serial || "",
         ScreenUrl: null,
+        BaseIosScreenUrl: localStorage.BaseIosScreenUrl || "",
         iosScreenUrl: null,
         loading: false,
         liveScreen: false,
@@ -38,6 +39,7 @@ const store = new Vuex.Store({
         getSerial: state => state.serial,
         getScreenUrl: state => state.ScreenUrl,
         getIosScreenUrl: state => state.iosScreenUrl,
+        getBaseIosScreenUrl: state => state.BaseIosScreenUrl,
         getLoading: state => state.loading,
         getLiveScreen: state => state.liveScreen,
         getJsonHierarchy: state => state.jsonHierarchy,
@@ -70,8 +72,12 @@ const store = new Vuex.Store({
         setScreenUrl(state, data) {
             state.ScreenUrl = data
         },
-        setIosScreenUrl(state, data) {
+        setIosScreenUrl(state,data){
             state.iosScreenUrl = data
+        },
+        setBaseIosScreenUrl(state, data) {
+            localStorage.setItem("BaseIosScreenUrl", data)
+            // state.iosScreenUrl = data
         },
         setLoading(state, data) {
             state.loading = data

@@ -13,7 +13,7 @@
       </el-col>
       <el-col :span="8">
         <el-input size="mini" v-model="serial"/>
-        <el-input size="mini" v-show="platform==='iOS'" type="text" :v-model="iosScreenUrl"/>
+        <el-input size="mini" v-show="platform==='iOS'" v-model="iosScreenUrl"/>
       </el-col>
       <el-col :span="2">
         <el-button size="mini" @click="doConnect" style="width:100%" :disabled="connecting">
@@ -55,7 +55,7 @@ export default {
       ],
       platform: this.$store.getters.getPlatform,
       ScreenUrl: this.$store.getters.getScreenUrl,
-      iosScreenUrl: this.$store.getters.getIosScreenUrl,
+      iosScreenUrl: this.$store.getters.getBaseIosScreenUrl,
       serial: this.$store.getters.getSerial,
       loading: this.$store.getters.getLoading,
       liveScreen: false,
@@ -88,6 +88,11 @@ export default {
       if (this.$store.getters.getLiveScreen !== this.liveScreen) {
         this.liveScreen = this.$store.getters.getLiveScreen
       }
+    },
+    iosScreenUrl: function (event) {
+      this.iosScreenUrl = event
+      this.$store.commit("setBaseIosScreenUrl", event)
+      this.$store.commit("setIosScreenUrl", event + '?random=' + Math.random())
     }
   },
   created() {
@@ -126,15 +131,30 @@ export default {
       this.$store.dispatch("hierarchyRefresh")
     },
     liveDevice() {
-      if (this.$store.getters.getPlatform === "Android" && this.$store.getters.getScreenUrl === null) {
-        this.doConnect()
-        this.liveScreen = false
+      switch (this.$store.getters.getPlatform) {
+        case ("Android"): {
+          if (this.$store.getters.getScreenUrl === null) {
+            this.doConnect()
+            this.liveScreen = false
+          } else {
+            this.$store.commit("setLiveScreen", this.liveScreen)
+          }
+          break
+        }
+        case ("iOS"): {
+          if (this.$store.getters.getBaseIosScreenUrl === null) {
 
-      } else {
-        this.$store.commit("setLiveScreen", this.liveScreen)
+            this.liveScreen = false
+          } else {
+            this.$store.commit("setIosScreenUrl", this.$store.getters.getBaseIosScreenUrl + '?random=' + Math.random())
+            this.$store.commit("setLiveScreen", this.liveScreen)
+          }
+        }
       }
+
     },
     iosLiveScreen() {
+      this.$store.commit("setIosScreenUrl", this.$store.getters.getBaseIosScreenUrl + '?random=' + Math.random())
     }
   }
 }

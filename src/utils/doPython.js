@@ -66,6 +66,7 @@ Python.generatePreloadCode = function () {
             `d = MobileDriver("ios","${deviceUrl}")`,
             "d = d()",
             "ai = MobileActionImport(d())",
+            "d.healthcheck()"
         ]
     } else if (m[1] === "android") {
         codeLines = [
