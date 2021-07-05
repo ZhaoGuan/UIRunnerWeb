@@ -12,7 +12,8 @@
       <img id="loading" style="z-index: 10" v-if="loading" src="../assets/loading.svg">
       <el-button @click="doKeyEvent('power')">POWER</el-button>
       <el-button @click="doKeyEvent('home')">HOME</el-button>
-      <el-button @click="doKeyEvent('back')" v-show="platform === 'Android'">Back</el-button>
+      <el-button @click="doKeyEvent('back')" v-show="platform === 'Android'">BACK</el-button>
+      <el-button @click="iOSBack" v-show="platform === 'iOS'">BACK</el-button>
     </section>
   </el-card>
 </template>
@@ -219,6 +220,9 @@ export default {
       this.python.doTap()
     }
     ,
+    iOSBack() {
+      this.python.iOSBack()
+    },
     resizeScreen(img) {
       // check if need update
       if (img) {

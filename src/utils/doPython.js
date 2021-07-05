@@ -176,3 +176,7 @@ Python.doSwipe = function (begin, end) {
         this.runPython(code)
     }
 }
+Python.iOSBack = function () {
+    const code = `d.swipe(0,0.5,0.5,0.5)`
+    this.runPython(code)
+}
