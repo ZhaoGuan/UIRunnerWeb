@@ -7,6 +7,17 @@ Python.loading = null
 Python.platform = null
 Python.deviceId = null
 Python.canvas = null
+Python.setLoadingData = []
+Python.setLoading = function () {
+    for (const key in Python.setLoadingData) {
+        const callBack = Python.setLoadingData[key]
+        if (callBack.data) {
+            callBack.func(callBack.data)
+        } else {
+            callBack.func()
+        }
+    }
+}
 Python.callBackData = []
 Python.callBack = function () {
     for (const key in Python.callBackData) {
@@ -89,7 +100,6 @@ Python.runPython = function (code) {
     console.log(code)
     return new Promise((resolve) => {
         this.pyshell.running = true
-        console.log(this.pyshell.ws)
         this.pyshell.ws.send(JSON.stringify({method: "input", value: code}))
         resolve()
     }).then(this.callBack)

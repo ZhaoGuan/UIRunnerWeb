@@ -1,19 +1,22 @@
 <template>
   <el-card shadow="hover">
-    <section id="screen" class="screen">
-      <canvas id="fgCanvas" @dblclick="doTap(nodeSelected)" class="canvas-fg"
-              v-bind:style="canvasStyle"></canvas>
-      <canvas v-show="(platform==='iOS'&&liveScreen===false)||platform==='Android'" id="bgCanvas"
-              class="canvas-bg"
-              v-bind:style="canvasStyle"></canvas>
-      <img v-show="platform==='iOS'&&liveScreen" id="canvas-bg-ios" class="canvas-bg"
-           v-bind:style="canvasStyle">
-      <span class="finger finger-0" id="finger" style="transform: translate3d(200px, 100px, 0px)"></span>
-      <img id="loading" style="z-index: 10" v-if="loading" src="../assets/loading.svg">
-      <el-button @click="doKeyEvent('power')">POWER</el-button>
-      <el-button @click="doKeyEvent('home')">HOME</el-button>
-      <el-button @click="doKeyEvent('back')" v-show="platform === 'Android'">BACK</el-button>
-      <el-button @click="iOSBack" v-show="platform === 'iOS'">BACK</el-button>
+    <section class="screen">
+      <el-row id="screen" class="screen-box">
+        <img style="z-index: 10;" v-if="loading" src="../assets/loading.svg">
+        <canvas id="fgCanvas" @dblclick="doTap(nodeSelected)" class="canvas-fg"
+                v-bind:style="canvasStyle"></canvas>
+        <canvas v-show="(platform==='iOS'&&liveScreen===false)||platform==='Android'" id="bgCanvas"
+                class="canvas-bg"
+                v-bind:style="canvasStyle"></canvas>
+        <img v-show="platform==='iOS'&&liveScreen" id="canvas-bg-ios" class="canvas-bg"
+             v-bind:style="canvasStyle">
+      </el-row>
+      <el-row class="button-footer">
+        <el-button @click="doKeyEvent('power')">POWER</el-button>
+        <el-button @click="doKeyEvent('home')">HOME</el-button>
+        <el-button @click="doKeyEvent('back')" v-show="platform === 'Android'">BACK</el-button>
+        <el-button @click="iOSBack" v-show="platform === 'iOS'">BACK</el-button>
+      </el-row>
     </section>
   </el-card>
 </template>
@@ -54,17 +57,19 @@ export default {
       ImageCounter: 0,
       python: Python,
       nodesList: [],
-      screenWebSocket: null
+      screenWebSocket: null,
+      loading: false
     }
   },
   mounted() {
     const fg = document.getElementById('fgCanvas')
     const bg = document.getElementById('bgCanvas')
+    const screenClient = document.getElementById("screen")
     // 这个大小应该为实际的设备大小
-    fg.width = 1080
-    fg.height = 2310
-    bg.width = 1080
-    bg.height = 2310
+    fg.width = screenClient.clientWidth
+    fg.height = screenClient.clientHeight
+    bg.width = screenClient.clientWidth
+    bg.height = screenClient.clientHeight
     this.canvas.fg = fg
     this.canvas.bg = bg
     this.activeMouseControl()
@@ -72,12 +77,8 @@ export default {
   },
   watch: {
     '$store.state.platform': function () {
-      console.log(this.$store.getters.getPlatform)
       this.platform = this.$store.getters.getPlatform
     },
-    // '$store.state.loading': function () {
-    //   this.loading = this.$store.getters.getLoading
-    // },
     '$store.state.jsonHierarchy': function () {
       this.originNodeMaps = nodesMap(this.$store.getters.getJsonHierarchy)
       const nodesList = []
@@ -106,21 +107,20 @@ export default {
       }
     },
     "$store.state.iosScreenUrl": function () {
+      this.$store.dispatch("screenRefresh")
       this.iosLiveScreen()
+    },
+    "$store.state.loading": function () {
+      this.loading = this.$store.getters.getLoading
     }
   },
   computed: {
-    loading() {
-      return this.$store.getters.getLoading
-    },
     deviceUrl() {
       return this.$store.getters.getDeviceUrl
     },
     nodeSelected() {
       return this.$store.getters.getNodeSelected
     },
-  },
-  beforeDestroy() {
   },
   methods: {
     imagePool() {
@@ -179,7 +179,7 @@ export default {
 
           URL.revokeObjectURL(url)
           url = null
-          setTimeout(self.loadLiveHierarchy(), 2000)
+          // setTimeout(self.loadLiveHierarchy(), 2000)
         }
 
         img.onerror = function () {
@@ -588,23 +588,40 @@ export default {
 </script>
 
 <style scoped>
-.screen {
+.screen-box {
+  /*居中方法*/
+  display: flex;
   align-items: center;
+  justify-content: center;
   background-color: gray;
+  position: relative;
+  height: 85vh;
+  width: 100%;
+}
+
+.screen {
+  /*居中方法*/
+  height: 90vh;
+  width: 100%;
   position: relative;
 }
 
 .canvas-fg {
   z-index: 1;
-  left: 0;
-  top: 0;
-  position: relative;
+  vertical-align: middle;
+  position: absolute;
 }
 
 .canvas-bg {
   z-index: 0;
-  left: 0;
-  top: 0;
+  vertical-align: middle;
   position: absolute;
 }
+
+.button-footer {
+  width: 100%;
+  bottom: 0;
+  position: absolute;
+}
+
 </style>

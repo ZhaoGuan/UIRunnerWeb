@@ -12,8 +12,17 @@
         </el-select>
       </el-col>
       <el-col :span="8">
-        <el-input size="mini" v-model="serial"/>
-        <el-input size="mini" v-show="platform==='iOS'" v-model="iosScreenUrl"/>
+        <div v-show="platform==='Android'">
+          <el-input size="mini" v-model="serial"/>
+        </div>
+        <div v-show="platform==='iOS'">
+          <el-col :span="12">
+            <el-input size="mini" v-model="serial"/>
+          </el-col>
+          <el-col :span="12">
+            <el-input size="mini" v-model="iosScreenUrl"/>
+          </el-col>
+        </div>
       </el-col>
       <el-col :span="2">
         <el-button size="mini" @click="doConnect" style="width:100%" :disabled="connecting">
@@ -33,7 +42,7 @@
         <el-button size="mini" v-if="platform==='iOS'&&liveScreen" class="btn btn-default" @click="iosLiveScreen">刷新
         </el-button>
         <el-button size="mini" type="danger" v-if="pythonReconnect===false" class="btn btn-default"
-                   @click="Python.initPythonWebSocket()">
+                   @click="python.initPythonWebSocket()">
           重连
         </el-button>
       </el-col>
@@ -57,10 +66,8 @@ export default {
       ScreenUrl: this.$store.getters.getScreenUrl,
       iosScreenUrl: this.$store.getters.getBaseIosScreenUrl,
       serial: this.$store.getters.getSerial,
-      loading: this.$store.getters.getLoading,
       liveScreen: false,
       connecting: false,
-      pythonReconnect: false,
       python: Python
     }
   },
@@ -97,11 +104,18 @@ export default {
   },
   created() {
     this.python.initPythonWebSocket()
-    this.pythonReconnect = Python.pyshell.wsOpen
   },
-  computed: {},
+  computed: {
+    loading() {
+      return this.$store.getters.getLoading
+    },
+    pythonReconnect() {
+      return Python.pyshell.wsOpen
+    }
+  },
   methods: {
     doConnect() {
+      this.$store.commit("setLoading", true)
       connect({
         deviceUrl: this.serial,
         platform: this.platform
@@ -121,7 +135,12 @@ export default {
             data: "hierarchyRefresh"
           },
         ]
-        this.python.callBackFuncData = "hierarchyRefresh"
+        this.python.setLoadingData = [
+          {
+            func: this.$store.dispatch,
+            data: "setIsLoading"
+          }
+        ]
         this.python.runPython(this.python.generatePreloadCode())
         this.dumpHierarchyWithScreen()
       })
@@ -142,8 +161,8 @@ export default {
           break
         }
         case ("iOS"): {
-          if (this.$store.getters.getBaseIosScreenUrl === null) {
-
+          if (this.$store.getters.getDeviceId === null) {
+            this.doConnect()
             this.liveScreen = false
           } else {
             this.$store.commit("setIosScreenUrl", this.$store.getters.getBaseIosScreenUrl + '?random=' + Math.random())

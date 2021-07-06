@@ -113,9 +113,6 @@ export default {
     }
   },
   created() {
-    this.$bus.$on("do-tap", payload => {
-      console.log(payload)
-    })
   },
   computed: {
     loading() {
@@ -212,9 +209,9 @@ export default {
     '$store.state.platform': function () {
       this.platform = this.$store.getters.getPlatform
     },
-    '$store.state.loading': function () {
-      this.loading = this.$store.getters.getLoading
-    },
+    // '$store.state.loading': function () {
+    //   this.loading = this.$store.getters.getLoading
+    // },
     '$store.state.jsonHierarchy': function () {
       this.originNodeMaps = nodesMap(this.$store.getters.getJsonHierarchy)
     },
