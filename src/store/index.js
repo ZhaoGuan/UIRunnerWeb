@@ -12,10 +12,10 @@ const store = new Vuex.Store({
     ],
     state: {
         deviceUrl: null,
-        platform: localStorage.platform || "Android",
+        platform: "Android",
         deviceId: null,
         serial: localStorage.serial || "",
-        ScreenUrl: null,
+        ScreenUrl: localStorage.ScreenUrl || "",
         BaseIosScreenUrl: localStorage.BaseIosScreenUrl || "",
         iosScreenUrl: null,
         loading: false,
@@ -60,7 +60,7 @@ const store = new Vuex.Store({
         },
         setPlatform(state, data) {
             localStorage.setItem("platform", data)
-            // state.platform = data
+            state.platform = data
 
         },
         setDeviceId(state, data) {
@@ -71,6 +71,7 @@ const store = new Vuex.Store({
             // state.serial = data
         },
         setScreenUrl(state, data) {
+            localStorage.setItem("ScreenUrl", data)
             state.ScreenUrl = data
         },
         setIosScreenUrl(state, data) {

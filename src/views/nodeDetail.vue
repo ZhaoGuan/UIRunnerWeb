@@ -12,19 +12,9 @@
     </el-row>
     <el-row class="panel-body">
       <div class="text-center">
-        <el-button size="mini" v-show="platform==='Android'" class="btn btn-default btn-sm" @click="doUnlock()">
-          Unlock
-        </el-button>
-        <el-button
-            size="mini"
-            class="btn btn-default btn-sm"
-            @click="doSendKeys('')">
-          Send Keys
-        </el-button>
-        <el-button size="mini" v-show="platform==='Android'" class="btn btn-default btn-sm"
-                   @click="doKeyEventNu('66')">
-          <i class="fa fa-power-off color-red"></i> enter
-        </el-button>
+        <el-button size="mini" v-show="platform==='Android'" @click="doUnlock()">Unlock</el-button>
+        <el-button size="mini" @click="doSendKeys('')">Send Keys</el-button>
+        <el-button size="mini" v-show="platform==='Android'" @click="doKeyEventNu('66')">Enter</el-button>
         <el-button size="mini" :disabled="!nodeSelected" @click="doTap()">Tap
         </el-button>
         <el-button size="mini" :disabled="!nodeSelected" @click="doSetText('')">
@@ -109,21 +99,15 @@ export default {
       showCursorPercent: true,
       mapAttrCount: {},
       originNodeMaps: null,
-      nodeSelected: null
+      nodeSelected: null,
+      platform: this.$store.getters.getPlatform,
+      loading: this.$store.getters.getLoading,
+      activity: this.$store.getters.getActivity
     }
   },
   created() {
   },
   computed: {
-    loading() {
-      return this.$store.getters.getLoading
-    },
-    activity() {
-      return this.$store.getters.getActivity
-    },
-    platform() {
-      return this.$store.getters.getPlatform
-    },
     nodes: function () {
       const nodesList = []
       for (const key in this.originNodeMaps) {
@@ -206,12 +190,15 @@ export default {
     },
   },
   watch: {
+    "$store.state.loading": function () {
+      this.loading = this.$store.getters.getLoading
+    },
+    "$store.state.activity": function () {
+      this.activity = this.$store.getters.getActivity
+    },
     '$store.state.platform': function () {
       this.platform = this.$store.getters.getPlatform
     },
-    // '$store.state.loading': function () {
-    //   this.loading = this.$store.getters.getLoading
-    // },
     '$store.state.jsonHierarchy': function () {
       this.originNodeMaps = nodesMap(this.$store.getters.getJsonHierarchy)
     },
