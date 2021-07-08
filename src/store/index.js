@@ -35,6 +35,7 @@ const store = new Vuex.Store({
         funDocList: null,
         tapPoint: null,
         actionList: [],
+        mouseHoverLock: false,
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -60,6 +61,7 @@ const store = new Vuex.Store({
         getFuncDocList: state => state.funDocList,
         getTapPoint: state => state.tapPoint,
         getActionList: state => state.actionList,
+        getMouseHoverLock: state => state.mouseHoverLock
 
     },
     mutations: {
@@ -137,6 +139,9 @@ const store = new Vuex.Store({
         setActionList(state, data) {
             console.log(data)
             state.actionList = data
+        },
+        setMouseHoverLock(state, data) {
+            state.mouseHoverLock = data
         }
     },
     modules: {},

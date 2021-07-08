@@ -1,8 +1,9 @@
 <template>
   <el-card shadow="hover">
+    <el-row><label>所选元素属性</label></el-row>
     <el-row class="panel-heading">
       <el-col :span="12">
-        <label>选择的元素</label>
+        <el-switch v-model="mouseHoverLock" active-text="锁定" inactive-text="解锁"></el-switch>
       </el-col>
       <el-col :span="12">
         <el-button size="mini" :disabled="loading" @click="clearCanvas()">
@@ -102,7 +103,8 @@ export default {
       nodeSelected: null,
       platform: this.$store.getters.getPlatform,
       loading: this.$store.getters.getLoading,
-      activity: this.$store.getters.getActivity
+      activity: this.$store.getters.getActivity,
+      mouseHoverLock: false
     }
   },
   created() {
@@ -146,6 +148,10 @@ export default {
     },
   },
   watch: {
+    mouseHoverLock() {
+      console.log(this.mouseHoverLock)
+      this.$store.commit("setMouseHoverLock", this.mouseHoverLock)
+    },
     "$store.state.loading": function () {
       this.loading = this.$store.getters.getLoading
     },

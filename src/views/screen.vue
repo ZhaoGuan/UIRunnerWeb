@@ -114,6 +114,10 @@ export default {
     },
     "$store.state.loading": function () {
       this.loading = this.$store.getters.getLoading
+    },
+    "$store.state.nodeSelected": function () {
+      this.nodeSelected = this.$store.getters.getNodeSelected
+      this.drawRefresh()
     }
   },
   computed: {
@@ -461,7 +465,7 @@ export default {
         const pos = coord(event);
         const nodeHoveredList = that.findNodesByPosition(pos);
         const nodeHovered = nodeHoveredList[0];
-        if (nodeHovered) {
+        if (nodeHovered && !that.$store.getters.getMouseHoverLock) {
           that.nodeHovered = nodeHovered
           that.drawRefresh()
           that.$store.commit("setNodeSelectedId", nodeHovered._id)
