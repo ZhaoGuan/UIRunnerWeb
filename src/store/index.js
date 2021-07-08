@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-import {hierarchy, screenshot} from "@/api/ui";
+import {hierarchy, screenshot, functionList} from "@/api/ui";
 import {b64toBlob} from "@/utils/common"
 
 Vue.use(Vuex)
@@ -30,7 +30,11 @@ const store = new Vuex.Store({
         imgBlob: null,
         cursor: null,
         nodeSelected: null,
-        nodeSelectedId: null
+        nodeSelectedId: null,
+        selectedElement: null,
+        funDocList: null,
+        tapPoint: null,
+        actionList: [],
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -51,7 +55,11 @@ const store = new Vuex.Store({
         getCursor: state => state.cursor,
         getNodeSelected: state => state.nodeSelected,
         getNodeSelectedId: state => state.nodeSelectedId,
+        getSelectedElement: state => state.selectedElement,
         getWindowSize: state => state.windowSize,
+        getFuncDocList: state => state.funDocList,
+        getTapPoint: state => state.tapPoint,
+        getActionList: state => state.actionList,
 
     },
     mutations: {
@@ -114,8 +122,21 @@ const store = new Vuex.Store({
         setNodeSelectedId(state, data) {
             state.nodeSelectedId = data
         },
+        setSelectedElement(state, data) {
+            state.selectedElement = data
+        },
         setWindowSize(state, data) {
             state.windowSize = data
+        },
+        setFuncDocList(state, data) {
+            state.funDocList = data
+        },
+        setTapPoint(state, data) {
+            state.tapPoint = data
+        },
+        setActionList(state, data) {
+            console.log(data)
+            state.actionList = data
         }
     },
     modules: {},
@@ -189,6 +210,13 @@ const store = new Vuex.Store({
             this.screenRefresh(commit)
             this.hierarchyRefresh(commit)
             commit("setLoading", false)
+        },
+        getFuncDocList({commit}) {
+            functionList("mobil").then(response => {
+                if (response.status === 20000) {
+                    commit("setFuncDocList", response.data)
+                }
+            })
         }
     }
 })

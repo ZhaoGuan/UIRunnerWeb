@@ -74,9 +74,9 @@ Python.generatePreloadCode = function () {
             "import os",
             "from mobile.mobile_driver import MobileDriver",
             "from commen.action_import import MobileActionImport",
-            `d = MobileDriver("ios","${deviceUrl}")`,
-            "d = d()",
-            "ai = MobileActionImport(d())",
+            `md = MobileDriver("ios","${deviceUrl}")`,
+            "d = md()",
+            "action = MobileActionImport(d())",
             "d.healthcheck()"
         ]
     } else if (m[1] === "android") {
@@ -84,9 +84,9 @@ Python.generatePreloadCode = function () {
             "import os",
             "from mobile.mobile_driver import MobileDriver",
             "from commen.action_import import MobileActionImport",
-            `d = MobileDriver("android","${deviceUrl}")`,
-            "d = d()",
-            "ai = MobileActionImport(d())",
+            `md = MobileDriver("android","${deviceUrl}")`,
+            "d = md()",
+            "action = MobileActionImport(d())",
         ]
     } else {
         console.error("Unsupported deviceId", this.deviceId)
@@ -188,5 +188,19 @@ Python.doSwipe = function (begin, end) {
 }
 Python.iOSBack = function () {
     const code = `d.swipe(0,0.5,0.5,0.5)`
+    this.runPython(code)
+}
+Python.startApp = function (packName, activity) {
+    // start_app()
+    let code = null
+    if (this.platform === 'Android') {
+        code = `md.start_app("${packName}","${activity}")`
+    } else {
+        code = `md.start_app("${packName}")`
+    }
+    this.runPython(code)
+}
+Python.androidUnlock = function (passWord) {
+    const code = `md.android_unlock(${passWord})`
     this.runPython(code)
 }

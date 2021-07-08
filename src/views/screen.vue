@@ -24,6 +24,7 @@
 <script>
 import {nodesMap} from "@/utils/common";
 import {Python} from "@/utils/doPython";
+import {elemXPathLite} from "@/utils/common"
 
 export default {
   name: "screen",
@@ -53,6 +54,7 @@ export default {
         }
       },
       nodeHovered: null,
+      nodeSelected: null,
       nodeSelectedId: null,
       ImageCounter: 0,
       python: Python,
@@ -117,9 +119,6 @@ export default {
   computed: {
     deviceUrl() {
       return this.$store.getters.getDeviceUrl
-    },
-    nodeSelected() {
-      return this.$store.getters.getNodeSelected
     },
   },
   methods: {
@@ -463,7 +462,7 @@ export default {
         const nodeHoveredList = that.findNodesByPosition(pos);
         const nodeHovered = nodeHoveredList[0];
         if (nodeHovered) {
-          // TODO node 在这里处理下内容
+          that.nodeHovered = nodeHovered
           that.drawRefresh()
           that.$store.commit("setNodeSelectedId", nodeHovered._id)
           that.$store.commit("setNodeSelected", nodeHovered)
@@ -534,8 +533,11 @@ export default {
         const nodeHoveredList = that.findNodesByPosition(pos);
         const nodeHovered = nodeHoveredList[0];
         if (nodeHovered) {
+          that.nodeSelected = nodeHovered
+          that.drawRefresh()
           that.$store.commit("setNodeSelectedId", nodeHovered._id)
           that.$store.commit("setNodeSelected", nodeHovered)
+          that.$store.commit("setSelectedElement", elemXPathLite(that.nodesList, that.originNodeMaps, nodeHovered))
         }
         element.removeEventListener('mouseleave', mouseHoverLeaveListener);
         element.removeEventListener('mousemove', mouseHoverListener);

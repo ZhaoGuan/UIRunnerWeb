@@ -69,7 +69,7 @@
     </template>
     <template v-if="nodeSelected&&nodeSelected.rect">
       <el-row>
-        <el-col :span="6">rect</el-col>
+        <el-col :span="6"><code>rect</code></el-col>
         <el-col :span="18">
           <span v-for="(value,key) in nodeSelected.rect" class="prop-value" :key="key">
               <code class="prop-value">{{ key }}:{{ value }} </code>
@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import {nodesMap} from "@/utils/common";
+import {elemXPathLite, nodesMap} from "@/utils/common";
 import {Python} from "@/utils/doPython";
 
 export default {
@@ -120,59 +120,15 @@ export default {
       if (cursor === null) {
         return {}
       }
-      if (this.showCursorPercent) {
+      this.$store.commit("setTapPoint", {x: cursor.px, y: cursor.py})
+      if (!this.showCursorPercent) {
         return {x: cursor.px, y: cursor.py}
       } else {
         return cursor
       }
     },
     elemXPathLite: function () {
-      this.emptyMapAttrCount()
-      this.nodes.forEach((n) => {
-        this.incrAttrCount("label", n.label)
-        this.incrAttrCount("resourceId", n.resourceId)
-        this.incrAttrCount("text", n.text)
-        this.incrAttrCount("_type", n._type)
-        this.incrAttrCount("description", n.description)
-      })
-      let node = this.nodeSelected;
-      let array = [];
-      while (node && node.parentId) {
-        const parent = this.originNodeMaps[node.parentId]
-        if (this.getAttrCount("label", node.label) === 1) {
-          array.push(`*[@label="${node.label}"]`)
-          break
-        } else if (this.getAttrCount("resourceId", node.resourceId) === 1) {
-          array.push(`*[@resource-id="${node.resourceId}"]`)
-          break
-        } else if (this.getAttrCount("text", node.text) === 1) {
-          array.push(`*[@text="${node.text}"]`)
-          break
-        } else if (this.getAttrCount("description", node.description) === 1) {
-          array.push(`*[@content-desc="${node.description}"]`)
-          break
-        } else if (this.getAttrCount("_type", node._type) === 1) {
-          array.push(`${node._type}`)
-          break
-        } else if (!parent) {
-          array.push(`${node._type}`)
-        } else {
-          let index = 0;
-          parent.children.some((n) => {
-            if (n._type === node._type) {
-              index++
-            }
-            return n._id === node._id
-          })
-          array.push(`${node._type}[${index}]`)
-        }
-        if (node.parent && node.parent._type) {
-          node = parent;
-        } else {
-          break
-        }
-      }
-      return `//${array.reverse().join("/")}`
+      return elemXPathLite(this.nodes, this.originNodeMaps, this.nodeSelected)
     },
     deviceUrl: function () {
       if (this.platform === 'Android' && this.serial === '') {
@@ -208,23 +164,6 @@ export default {
     }
   },
   methods: {
-    emptyMapAttrCount() {
-      this.mapAttrCount = {}
-    },
-    incrAttrCount(collectionKey, key) {
-      if (!Object.prototype.hasOwnProperty.call(this.mapAttrCount, collectionKey)) {
-        this.mapAttrCount[collectionKey] = {}
-      }
-      let count = this.mapAttrCount[collectionKey][key] || 0;
-      this.mapAttrCount[collectionKey][key] = count + 1;
-    },
-    getAttrCount(collectionKey, key) {
-      let mapCount = this.mapAttrCount[collectionKey];
-      if (!mapCount) {
-        return 0
-      }
-      return mapCount[key] || 0;
-    },
     filterAttributeKeys(elem) {
       return Object.keys(elem).filter(k => {
         if (['children', 'rect', "parent", "parentId"].includes(k)) {
