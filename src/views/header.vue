@@ -42,7 +42,7 @@
         <el-button size="mini" v-if="platform==='iOS'&&liveScreen" class="btn btn-default" @click="iosLiveScreen">刷新
         </el-button>
         <el-button size="mini" type="danger" v-if="pythonReconnect===false" class="btn btn-default"
-                   @click="python.initPythonWebSocket()">
+                   @click="python.runPython(python.generatePreloadCode())">
           重连
         </el-button>
       </el-col>

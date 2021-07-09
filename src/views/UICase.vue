@@ -27,11 +27,43 @@
     <el-collapse-item title="动作列表">
       <funcDialog ref="funcDialog"/>
       <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
+      <el-button type="success" size="mini" @click="addElementClick">添加元素点击</el-button>
       <el-button type="success" size="mini" @click="addTap">添加坐标动作</el-button>
       <el-button type="success" size="mini" @click="clearActionList">清空动作</el-button>
-
-      <el-row v-for="(actioin,key) in actionList" v-bind:key="key">
-        {{ actioin }}
+      <el-table
+          :data="actionList"
+          stripe
+          style="width: 100%">
+        <el-table-column
+            prop="NAME"
+            label="动作名称"
+        />
+        <el-table-column
+            prop="TYPE"
+            label="方法"
+        />
+<!--        <el-table-column-->
+<!--            label="DATA"-->
+<!--        >-->
+<!--          <template slot-scope="scope">{{ scope.row.DATA }}</template>-->
+<!--        </el-table-column>-->
+        <el-table-column label="操作" width="250">
+          <template slot-scope="scope">
+            <el-button size="mini" icon="el-icon-arrow-up"
+                       @click="actionUp(scope.row)">
+            </el-button>
+            <el-button size="mini" icon="el-icon-arrow-down"
+                       @click="actionDown(scope.row)">
+            </el-button>
+            <el-button size="mini" type="danger"
+                       @click="deleteAction(scope.$index,scope.row)">DELETE
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-row>
+        <el-button type="success" size="mini" @click="yamlCase">生成YML用例</el-button>
+        <el-button type="danger" size="mini" @click="runCase">运行</el-button>
       </el-row>
     </el-collapse-item>
   </el-collapse>
@@ -99,17 +131,63 @@ export default {
     openDialog() {
       this.$refs.funcDialog.openDialog()
     },
+    addElementClick() {
+      const element = this.$store.getters.getSelectedElement
+      if (element === null) {
+        return
+      }
+      const actionList = this.$store.getters.getActionList
+      actionList.push({
+        'NAME': "点击元素:" + element,
+        'TYPE': "click_element",
+        'DATA': {"location": element}
+      })
+      this.$store.commit("setActionList", actionList)
+    },
     addTap() {
       const point = this.$store.getters.getTapPoint
       if (point === null) {
         return
       }
       const actionList = this.$store.getters.getActionList
-      actionList.push({})
+      actionList.push({
+        'NAME': "点击 坐标点:(" + point.x + "," + point.y + ")",
+        'TYPE': "tap",
+        'DATA': point
+      })
       this.$store.commit("setActionList", actionList)
     },
     clearActionList() {
       this.$store.commit("setActionList", [])
+    },
+    deleteAction(index, data) {
+      this.actionList.splice(this.actionList.indexOf(data), 1)
+      this.$store.commit("setActionList", this.actionList)
+
+    },
+    actionUp(data) {
+      const index = this.actionList.indexOf(data)
+      if (index !== 0) {
+        this.actionList[index] = this.actionList.splice(index - 1, 1, this.actionList[index])[0];
+      } else {
+        this.actionList.push(this.actionList.shift());
+      }
+      this.$store.commit("setActionList", this.actionList)
+    },
+    actionDown(data) {
+      const index = this.actionList.indexOf(data)
+      if (index !== this.actionList.length - 1) {
+        this.actionList[index] = this.actionList.splice(index + 1, 1, this.actionList[index])[0];
+
+      } else {
+        this.actionList.unshift(this.actionList.splice(index, 1)[0]);
+      }
+      this.$store.commit("setActionList", this.actionList)
+    },
+    yamlCase() {
+
+    },
+    runCase() {
     }
   }
 }

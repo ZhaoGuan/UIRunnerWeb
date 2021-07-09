@@ -137,7 +137,6 @@ const store = new Vuex.Store({
             state.tapPoint = data
         },
         setActionList(state, data) {
-            console.log(data)
             state.actionList = data
         },
         setMouseHoverLock(state, data) {
@@ -187,6 +186,7 @@ const store = new Vuex.Store({
         screenRefresh({commit}) {
             if (!this.getters.getLiveScreen) {
                 commit("setLoading", true)
+                console.log("Do Screen")
                 screenshot(this.getters.getDeviceId)
                     .then(function (ret) {
                         commit("setImgBlob", b64toBlob(ret.data.data, 'image/' + ret.data.type))
