@@ -218,7 +218,7 @@ const store = new Vuex.Store({
         },
         getFuncDocList({commit}) {
             functionList("mobil").then(response => {
-                if (response.status === 20000) {
+                if (response.code === 20000) {
                     commit("setFuncDocList", response.data)
                 }
             })
