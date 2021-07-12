@@ -285,28 +285,38 @@ export default {
     getCase() {
       const caseResult = JSON.parse(JSON.stringify(this.template))
       const actionList = this.$store.getters.getActionList
+      let formRules = true
       this.$refs.templateForm.validate((valid) => {
         if (!valid) {
-          console.log("error")
           message("基础设置错误", "有基础内容没有填写")
-          return
+          formRules = false
         }
       });
+      if (!formRules) {
+        return false
+      }
       if (actionList.length === 0) {
         message("没有操作步骤", "请填加操作步骤！")
-        return
+        return false
       }
       caseResult.ACTIONS = actionList
       caseResult.TYPE = this.platform
-      caseResult.ALERT_CLOSE_ELEMENTS = this.$store.getters.getAlertClose
+      const alertCloseList = []
+      for (const index in this.$store.getters.getAlertClose) {
+        alertCloseList.push(this.$store.getters.getAlertClose[index].value)
+      }
+      caseResult.ALERT_CLOSE_ELEMENTS = alertCloseList
       caseResult.DESIRED_CAPS.deviceName = this.deviceName
       return caseResult
     },
     yamlCase() {
       const caseResult = this.getCase()
+      console.log(caseResult)
+      if (!caseResult) {
+        return
+      }
       const yaml = require('js-yaml')
       const yaml_data = yaml.safeDump(caseResult)
-      console.log(yaml_data)
 
 
       function downloadFileHelper(fileName, content) {
@@ -329,6 +339,9 @@ export default {
     },
     runCase() {
       const caseResult = this.getCase()
+      if (!caseResult) {
+        return
+      }
       caseTest(caseResult)
     }
   }
