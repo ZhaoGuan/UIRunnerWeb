@@ -42,7 +42,7 @@
         <el-button size="mini" v-if="platform==='iOS'&&liveScreen" class="btn btn-default" @click="iosLiveScreen">刷新
         </el-button>
         <el-button size="mini" type="danger" v-if="pythonReconnect===false" class="btn btn-default"
-                   @click="python.runPython(python.generatePreloadCode())">
+                   @click="python.initPythonWebSocket() && python.runPython(python.generatePreloadCode())">
           重连
         </el-button>
       </el-col>
@@ -126,6 +126,7 @@ export default {
         this.$store.commit("setScreenUrl", ret.data.screenWebSocketUrl)
         this.python.platform = this.platform
         this.python.deviceId = deviceId
+        console.log(deviceId)
         this.python.callBackData = [
           {
             func: this.$store.dispatch,

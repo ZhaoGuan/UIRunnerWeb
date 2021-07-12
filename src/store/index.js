@@ -36,6 +36,8 @@ const store = new Vuex.Store({
         tapPoint: null,
         actionList: [],
         mouseHoverLock: false,
+        alertClose: [],
+        saveAlertClose: localStorage.saveAlertClose || ""
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -61,7 +63,9 @@ const store = new Vuex.Store({
         getFuncDocList: state => state.funDocList,
         getTapPoint: state => state.tapPoint,
         getActionList: state => state.actionList,
-        getMouseHoverLock: state => state.mouseHoverLock
+        getMouseHoverLock: state => state.mouseHoverLock,
+        getAlertClose: state => state.alertClose,
+        getSaveAlertClose: state => state.saveAlertClose
 
     },
     mutations: {
@@ -69,16 +73,15 @@ const store = new Vuex.Store({
             state.deviceUrl = data
         },
         setPlatform(state, data) {
-            localStorage.setItem("platform", data)
+            console.log(data)
             state.platform = data
-
         },
         setDeviceId(state, data) {
             state.deviceId = data
         },
         setSerial(state, data) {
             localStorage.setItem("serial", data)
-            // state.serial = data
+            state.serial = data
         },
         setScreenUrl(state, data) {
             localStorage.setItem("ScreenUrl", data)
@@ -141,6 +144,12 @@ const store = new Vuex.Store({
         },
         setMouseHoverLock(state, data) {
             state.mouseHoverLock = data
+        },
+        setAlertClose(state, data) {
+            state.alertClose = data
+        },
+        setSaveAlertClose(state, data) {
+            localStorage.setItem("saveAlertClose", data)
         }
     },
     modules: {},

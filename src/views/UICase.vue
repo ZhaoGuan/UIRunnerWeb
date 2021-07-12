@@ -1,28 +1,57 @@
 <template>
   <el-collapse>
     <el-collapse-item title="基础设置">
-      <el-form :data="template">
-        <el-form-item :size="formItemSize" label="用例名称">
+      <el-form :model="template" :rules="rules" ref="templateForm">
+        <el-form-item :size="formItemSize" label="用例名称" prop="TITLE">
           <el-input :size="formItemSize" label="用例名称" v-model="template.TITLE"></el-input>
         </el-form-item>
-        <el-form-item :size="formItemSize" label="用例描述">
+        <el-form-item :size="formItemSize" label="用例描述" prop="DESCRIPTION">
           <el-input :size="formItemSize" v-model="template.DESCRIPTION"></el-input>
         </el-form-item>
-        <el-form-item v-if="platform==='ANDROID'" :size="formItemSize" label="设备密码">
+        <el-form-item v-if="platform==='ANDROID'" :size="formItemSize" label="设备密码" prop="DESIRED_CAPS.passWord">
           <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.passWord"></el-input>
         </el-form-item>
-        <el-form-item :size="formItemSize" label="appPackage">
+        <el-form-item :size="formItemSize" label="appPackage" prop="DESIRED_CAPS.appPackage">
           <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.appPackage"></el-input>
         </el-form-item>
-        <el-form-item :size="formItemSize" v-if="platform==='ANDROID'" label="appActivity">
-          <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.appPackage"></el-input>
+        <el-form-item :size="formItemSize" v-if="platform==='ANDROID'" label="appActivity"
+                      prop="DESIRED_CAPS.appActivity">
+          <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.appActivity"></el-input>
         </el-form-item>
-        <el-form-item :size="formItemSize">
-          <el-button v-if="platform==='ANDROID'" type="success" :size="formItemSize" @click="unlockDevice">解锁设备
+        <el-form-item>
+          <el-button :disabled="show" v-if="platform==='ANDROID'" type="success" :size="formItemSize"
+                     @click="unlockDevice">解锁设备
           </el-button>
-          <el-button type="success" :size="formItemSize" @click="startApp">启动应用</el-button>
+          <el-button :disabled="show" type="success" :size="formItemSize" @click="startApp">启动应用</el-button>
+          <el-button type="success" :size="formItemSize" @click="clearTemplate">清空设置</el-button>
         </el-form-item>
       </el-form>
+    </el-collapse-item>
+    <el-collapse-item title="弹窗关闭">
+      <el-col :span="18">
+        <el-input size="mini" v-model="alertCloseName"></el-input>
+      </el-col>
+      <el-col :span="6">
+        <el-button type="success" size="mini" @click="addAlertClose">添加Alert关闭元素</el-button>
+      </el-col>
+      <el-table :data="alertCloseList">
+        <el-table-column
+            prop="name"
+            label="名称"
+            width="150"
+        />
+        <el-table-column
+            prop="value"
+            label="元素定位"
+        />
+        <el-table-column label="操作" width="100">
+          <template slot-scope="scope">
+            <el-button size="mini" type="danger"
+                       @click="delAlertClose(scope.row)">DELETE
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-collapse-item>
     <el-collapse-item title="动作列表">
       <funcDialog ref="funcDialog"/>
@@ -42,11 +71,11 @@
             prop="TYPE"
             label="方法"
         />
-<!--        <el-table-column-->
-<!--            label="DATA"-->
-<!--        >-->
-<!--          <template slot-scope="scope">{{ scope.row.DATA }}</template>-->
-<!--        </el-table-column>-->
+        <!--        <el-table-column-->
+        <!--            label="DATA"-->
+        <!--        >-->
+        <!--          <template slot-scope="scope">{{ scope.row.DATA }}</template>-->
+        <!--        </el-table-column>-->
         <el-table-column label="操作" width="250">
           <template slot-scope="scope">
             <el-button size="mini" icon="el-icon-arrow-up"
@@ -56,14 +85,15 @@
                        @click="actionDown(scope.row)">
             </el-button>
             <el-button size="mini" type="danger"
-                       @click="deleteAction(scope.$index,scope.row)">DELETE
+                       @click="deleteAction(scope.row)">DELETE
             </el-button>
           </template>
         </el-table-column>
       </el-table>
       <el-row>
-        <el-button type="success" size="mini" @click="yamlCase">生成YML用例</el-button>
-        <el-button type="danger" size="mini" @click="runCase">运行</el-button>
+        <el-button :disabled="show" type="success" size="mini" @click="yamlCase">生成YML用例
+        </el-button>
+        <el-button :disabled="show" type="danger" size="mini" @click="runCase">运行</el-button>
       </el-row>
     </el-collapse-item>
   </el-collapse>
@@ -72,16 +102,22 @@
 <script>
 import {Python} from "@/utils/doPython";
 import funcDialog from "./components/funcDialog"
+import {message} from "@/utils/tools";
+import {caseTest} from "@/api/ui";
 
 export default {
   name: "UICase",
   components: {funcDialog},
   data() {
     return {
+      platform: this.$store.getters.getPlatform.toUpperCase(),
+      deviceName: this.$store.getters.getSerial,
+      actionList: this.$store.getters.getActionList,
+      alertCloseName: null,
       template: {
-        'TITLE': '在线鉴定-鉴定视频',
-        'DESCRIPTION': '在线鉴定-鉴定视频',
-        'TYPE': this.platform,
+        'TITLE': null,
+        'DESCRIPTION': null,
+        'TYPE': null,
         'DESIRED_CAPS':
             {
               'URL': '',
@@ -95,29 +131,53 @@ export default {
         'ALERT_CLOSE_ELEMENTS': [],
         'ACTIONS': []
       },
+      rules: {
+        'TITLE': [
+          {required: true, type: 'string', message: '请添加用例名称', trigger: 'change'},
+        ],
+        'DESCRIPTION': [
+          {required: true, type: 'string', message: '请添加描述', trigger: 'blur'}
+        ],
+        'DESIRED_CAPS.appPackage': [
+          {required: true, type: 'string', message: '请输入appPackage', trigger: 'blur'}
+        ],
+        'DESIRED_CAPS.appActivity': [
+          {required: true, type: 'string', message: '请输入appActivity', trigger: 'blur'}
+        ],
+      },
       formItemSize: "mini",
       python: Python,
-      actionList: this.$store.getters.getActionList,
-      platform: this.$store.getters.getPlatform.toUpperCase(),
-      deviceName: this.$store.getters.getDeviceUrl
     }
   },
   created() {
+
   },
   mounted() {
+    const saveAlertClose = this.$store.getters.getSaveAlertClose
+    if (saveAlertClose) {
+      this.$store.commit("setAlertClose", JSON.parse(saveAlertClose))
+    }
   },
   watch: {
     '$store.state.platform': function () {
       this.platform = this.$store.getters.getPlatform.toUpperCase()
     },
-    '$store.state.deviceUrl': function () {
-      this.deviceName = this.$store.getters.getDeviceUrl
+    '$store.state.serial': function () {
+      this.deviceName = this.$store.getters.getSerial
     },
     '$store.state.actionList': function () {
       this.actionList = this.$store.getters.getActionList
     },
   },
-  computed: {},
+  computed: {
+    show() {
+      return !(this.python.pyshell.wsOpen && this.python.pyshell.base);
+    },
+    alertCloseList() {
+      return this.$store.getters.getAlertClose
+    }
+
+  },
   methods: {
     unlockDevice() {
       this.python.androidUnlock(this.template.DESIRED_CAPS.passWord)
@@ -130,6 +190,25 @@ export default {
     },
     openDialog() {
       this.$refs.funcDialog.openDialog()
+    },
+    addAlertClose() {
+      const element = this.$store.getters.getSelectedElement
+      if (element === null) {
+        return
+      }
+      const alertCloseList = this.$store.getters.getAlertClose
+      if (JSON.stringify(alertCloseList).includes(JSON.stringify(element))) {
+        return;
+      }
+      alertCloseList.push({name: this.alertCloseName, value: element})
+      this.$store.commit("setAlertClose", alertCloseList)
+      this.$store.commit("setSaveAlertClose", JSON.stringify(alertCloseList))
+      this.alertCloseName = null
+    },
+    delAlertClose(data) {
+      this.alertCloseList.splice(this.alertCloseList.indexOf(data), 1)
+      this.$store.commit("setAlertClose", this.alertCloseList)
+      this.$store.commit("setSaveAlertClose", JSON.stringify(this.alertCloseList))
     },
     addElementClick() {
       const element = this.$store.getters.getSelectedElement
@@ -160,7 +239,7 @@ export default {
     clearActionList() {
       this.$store.commit("setActionList", [])
     },
-    deleteAction(index, data) {
+    deleteAction(data) {
       this.actionList.splice(this.actionList.indexOf(data), 1)
       this.$store.commit("setActionList", this.actionList)
 
@@ -184,10 +263,73 @@ export default {
       }
       this.$store.commit("setActionList", this.actionList)
     },
+    clearTemplate() {
+      this.template = {
+        'TITLE': null,
+        'DESCRIPTION': null,
+        'TYPE': this.platform,
+        'DESIRED_CAPS':
+            {
+              'URL': '',
+              'appPackage': "com.yiding.jianhuo",
+              'appActivity': 'com.yiding.jianhuo.SplashActivity',
+              'deviceName': null,
+              'passWord': 888888,
+              'performance': false,
+              'perfHost': "ip",
+            },
+        'ALERT_CLOSE_ELEMENTS': [],
+        'ACTIONS': []
+      }
+    },
+    getCase() {
+      const caseResult = JSON.parse(JSON.stringify(this.template))
+      const actionList = this.$store.getters.getActionList
+      this.$refs.templateForm.validate((valid) => {
+        if (!valid) {
+          console.log("error")
+          message("基础设置错误", "有基础内容没有填写")
+          return
+        }
+      });
+      if (actionList.length === 0) {
+        message("没有操作步骤", "请填加操作步骤！")
+        return
+      }
+      caseResult.ACTIONS = actionList
+      caseResult.TYPE = this.platform
+      caseResult.ALERT_CLOSE_ELEMENTS = this.$store.getters.getAlertClose
+      caseResult.DESIRED_CAPS.deviceName = this.deviceName
+      return caseResult
+    },
     yamlCase() {
+      const caseResult = this.getCase()
+      const yaml = require('js-yaml')
+      const yaml_data = yaml.safeDump(caseResult)
+      console.log(yaml_data)
 
+
+      function downloadFileHelper(fileName, content) {
+        const aTag = document.createElement('a');
+        const blob = new Blob([content]);
+
+        aTag.download = fileName + ".yaml";
+        aTag.style = "display: none";
+        aTag.href = URL.createObjectURL(blob);
+        document.body.appendChild(aTag);
+        aTag.click();
+
+        setTimeout(function () {
+          document.body.removeChild(aTag);
+          window.URL.revokeObjectURL(blob);
+        }, 100);
+      }
+
+      downloadFileHelper(caseResult.TITLE, yaml_data)
     },
     runCase() {
+      const caseResult = this.getCase()
+      caseTest(caseResult)
     }
   }
 }

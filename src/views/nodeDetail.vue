@@ -149,7 +149,6 @@ export default {
   },
   watch: {
     mouseHoverLock() {
-      console.log(this.mouseHoverLock)
       this.$store.commit("setMouseHoverLock", this.mouseHoverLock)
     },
     "$store.state.loading": function () {

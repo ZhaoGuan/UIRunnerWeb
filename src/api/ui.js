@@ -33,3 +33,11 @@ export function functionList(type) {
         params: {type}
     })
 }
+
+export function caseTest(request_body) {
+    return request({
+        url: '/case/test',
+        method: 'post',
+        data: request_body
+    })
+}

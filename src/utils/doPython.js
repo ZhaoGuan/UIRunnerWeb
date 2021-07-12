@@ -2,6 +2,7 @@ export const Python = {}
 Python.pyshell = {
     ws: null,
     wsOpen: null,
+    base: false
 }
 Python.loading = null
 Python.platform = null
@@ -94,6 +95,7 @@ Python.generatePreloadCode = function () {
             `print("Unsupported deviceId: ${this.deviceId}")`
         ]
     }
+    this.pyshell.base = true
     return codeLines.join("\n") + "\n";
 }
 Python.runPython = function (code) {

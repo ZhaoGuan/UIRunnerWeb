@@ -16,6 +16,7 @@
     "core-js": "^3.6.5",
     "element-ui": "^2.4.5",
     "flatted": "^2.0.2",
+    "js-yaml": "^3.14.1",
     "vue": "^2.6.11",
     "vue-deferred": "^1.0.2",
     "vue-router": "^3.2.0",
