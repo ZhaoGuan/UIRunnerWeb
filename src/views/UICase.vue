@@ -53,6 +53,11 @@
             width="150"
         />
         <el-table-column
+            prop="action"
+            label="动作"
+            width="100"
+        />
+        <el-table-column
             prop="value"
             label="元素定位"
         />

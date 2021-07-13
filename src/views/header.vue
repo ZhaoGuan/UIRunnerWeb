@@ -116,7 +116,8 @@ export default {
   methods: {
     pythonReConnect() {
       this.python.initPythonWebSocket()
-      this.python.runPython(this.python.generatePreloadCode())
+      setTimeout(() => this.python.runPython(this.python.generatePreloadCode()), 2000)
+      // this.python.runPython(this.python.generatePreloadCode())
     },
     doConnect() {
       this.$store.commit("setLoading", true)
