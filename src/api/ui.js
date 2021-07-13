@@ -41,3 +41,11 @@ export function caseTest(request_body) {
         data: request_body
     })
 }
+
+export function taskResult(taskId) {
+    return request({
+        url: '/task/result',
+        method: 'get',
+        params: {taskId}
+    })
+}

@@ -112,6 +112,30 @@
         </el-button>
         <el-button :disabled="show" type="danger" size="mini" @click="runCase">运行</el-button>
       </el-row>
+      <div v-if="debugTaskResult">
+        <el-table
+            :data="debugTaskResult"
+            :show-header="true"
+            style="width: 100%"
+        >
+          <el-table-column
+              label="动作名称"
+              prop="label"
+              min-width="180">
+          </el-table-column>
+          <el-table-column
+              label="结果"
+              prop="result"
+              min-width="80">
+          </el-table-column>
+          <el-table-column
+              label="信息"
+              prop="message"
+              min-width="180"
+          >
+          </el-table-column>
+        </el-table>
+      </div>
     </el-collapse-item>
   </el-collapse>
 </template>
@@ -120,7 +144,7 @@
 import {Python} from "@/utils/doPython";
 import funcDialog from "./components/funcDialog"
 import {message} from "@/utils/tools";
-import {caseTest} from "@/api/ui";
+import {caseTest, taskResult} from "@/api/ui";
 
 export default {
   name: "UICase",
@@ -166,12 +190,15 @@ export default {
       },
       formItemSize: "mini",
       python: Python,
+      debugTaskId: null,
+      debugTaskTimer: null,
+      debugTaskResult: null
     }
   },
   created() {
-
   },
   mounted() {
+    this.debugTaskTimer = setInterval(this.getDebugTaskResult, 5000)
     const saveAlertClose = this.$store.getters.getSaveAlertClose
     if (saveAlertClose) {
       this.$store.commit("setAlertClose", JSON.parse(saveAlertClose))
@@ -257,6 +284,7 @@ export default {
     },
     clearActionList() {
       this.$store.commit("setActionList", [])
+      this.debugTaskResult = null
     },
     deleteAction(data) {
       this.actionList.splice(this.actionList.indexOf(data), 1)
@@ -364,7 +392,21 @@ export default {
       if (!caseResult) {
         return
       }
-      caseTest(caseResult)
+      caseTest(caseResult).then(response => {
+        if (response.code === 20000 && response.data !== null) {
+          this.debugTaskId = response.data.taskId
+        }
+      })
+    },
+    getDebugTaskResult() {
+      if (this.debugTaskId) {
+        taskResult(this.debugTaskId).then(response => {
+          if (response.code === 20000 && response.data.status === "SUCCESS") {
+            this.debugTaskResult = response.data.result
+            this.debugTaskId = null
+          }
+        })
+      }
     }
   }
 }
