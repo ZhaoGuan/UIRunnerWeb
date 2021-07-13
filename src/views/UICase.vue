@@ -28,11 +28,23 @@
       </el-form>
     </el-collapse-item>
     <el-collapse-item title="弹窗关闭">
-      <el-col :span="18">
+      <el-col :span="14">
         <el-input size="mini" v-model="alertCloseName"></el-input>
       </el-col>
-      <el-col :span="6">
-        <el-button type="success" size="mini" @click="addAlertClose">添加Alert关闭元素</el-button>
+      <el-col :span="10">
+        <el-col :span="12">
+          <el-select size="mini" v-model="alertCloseAction">
+            <el-option
+                v-for="item in alertCloseActionOptions"
+                :key="item.value"
+                :label="item.value"
+                :value="item.value">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="12">
+          <el-button type="success" size="mini" @click="addAlertClose">添加Alert关闭元素</el-button>
+        </el-col>
       </el-col>
       <el-table :data="alertCloseList">
         <el-table-column
@@ -114,6 +126,8 @@ export default {
       deviceName: this.$store.getters.getSerial,
       actionList: this.$store.getters.getActionList,
       alertCloseName: null,
+      alertCloseAction: "click",
+      alertCloseActionOptions: [{value: "click"}, {value: "back"}],
       template: {
         'TITLE': null,
         'DESCRIPTION': null,
@@ -121,8 +135,8 @@ export default {
         'DESIRED_CAPS':
             {
               'URL': '',
-              'appPackage': null,
-              'appActivity': null,
+              'appPackage': 'com.yiding.jianhuo',
+              'appActivity': 'com.yiding.jianhuo.SplashActivity',
               'deviceName': null,
               'passWord': 888888,
               'performance': false,
@@ -200,7 +214,7 @@ export default {
       if (JSON.stringify(alertCloseList).includes(JSON.stringify(element))) {
         return;
       }
-      alertCloseList.push({name: this.alertCloseName, value: element})
+      alertCloseList.push({name: this.alertCloseName, value: element, action: this.alertCloseAction})
       this.$store.commit("setAlertClose", alertCloseList)
       this.$store.commit("setSaveAlertClose", JSON.stringify(alertCloseList))
       this.alertCloseName = null
@@ -303,7 +317,10 @@ export default {
       caseResult.TYPE = this.platform
       const alertCloseList = []
       for (const index in this.$store.getters.getAlertClose) {
-        alertCloseList.push(this.$store.getters.getAlertClose[index].value)
+        alertCloseList.push({
+          value: this.$store.getters.getAlertClose[index].value,
+          action: this.$store.getters.getAlertClose[index].action
+        })
       }
       caseResult.ALERT_CLOSE_ELEMENTS = alertCloseList
       caseResult.DESIRED_CAPS.deviceName = this.deviceName

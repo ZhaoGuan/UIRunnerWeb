@@ -42,7 +42,7 @@
         <el-button size="mini" v-if="platform==='iOS'&&liveScreen" class="btn btn-default" @click="iosLiveScreen">刷新
         </el-button>
         <el-button size="mini" type="danger" v-if="pythonReconnect===false" class="btn btn-default"
-                   @click="python.initPythonWebSocket() && python.runPython(python.generatePreloadCode())">
+                   @click="pythonReConnect">
           重连
         </el-button>
       </el-col>
@@ -114,6 +114,10 @@ export default {
     }
   },
   methods: {
+    pythonReConnect() {
+      this.python.initPythonWebSocket()
+      this.python.runPython(this.python.generatePreloadCode())
+    },
     doConnect() {
       this.$store.commit("setLoading", true)
       connect({
