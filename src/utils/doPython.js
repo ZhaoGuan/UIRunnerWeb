@@ -5,13 +5,15 @@ export const Python = {}
 Python.pyshell = {
     ws: null,
     wsOpen: null,
-    base: false
+    base: false,
+    running: false
 }
 Python.loading = null
 Python.platform = null
 Python.deviceId = null
 Python.canvas = null
 Python.setLoadingData = []
+Python.running = false
 Python.setLoading = function () {
     for (const key in Python.setLoadingData) {
         const callBack = Python.setLoadingData[key]
@@ -62,6 +64,7 @@ Python.initPythonWebSocket = function () {
     }
     ws.onmessage = (messageData) => {
         const data = JSON.parse(messageData.data)
+        this.pyshell.running = false
         console.log("Python Run", data)
         if (data.status === "SUCCESS") {
             message("操作执行成功", "请等待页面刷新!")
@@ -73,6 +76,7 @@ Python.initPythonWebSocket = function () {
     }
     ws.onclose = () => {
         this.pyshell.wsOpen = false
+        this.pyshell.running = false
         console.log("websocket closed")
     }
 }
@@ -109,12 +113,15 @@ Python.generatePreloadCode = function () {
     return codeLines.join("\n") + "\n";
 }
 Python.runPython = function (code) {
-    console.log(code)
-    return new Promise((resolve) => {
-        this.pyshell.running = true
-        this.pyshell.ws.send(JSON.stringify({method: "input", value: code}))
-        resolve()
-    }).then()
+    if (!this.pyshell.running) {
+        console.log(code)
+        return new Promise((resolve) => {
+            this.pyshell.running = true
+            this.pyshell.ws.send(JSON.stringify({method: "input", value: code}))
+            resolve()
+        }).then()
+    }
+
 }
 Python.doUnlock = function () {
     const code = `d.unlock()`
@@ -141,7 +148,6 @@ Python.doSetText = function (text) {
         return;
     }
     if (this.nodeSelectedXpath) {
-        this.doClear()
         let code = this.generateNodeSelectorCode(this.nodeSelectedXpath)
         code += `.set_text("${text}")`
         this.loading = true;
@@ -150,8 +156,15 @@ Python.doSetText = function (text) {
 }
 Python.doClear = function () {
     if (this.nodeSelectedXpath) {
-        let code = this.generateNodeSelectorCode(this.nodeSelectedXpath)
-        code += '.clear_text()'
+        let code = ""
+        if (this.platform === 'iOS') {
+            code = this.generateNodeSelectorCode(this.nodeSelectedXpath)
+            code += '.clear_text()'
+        } else {
+            code = this.generateNodeSelectorCode(this.nodeSelectedXpath)
+            code += ".click()\n"
+            code += 'd.clear_text()'
+        }
         this.loading = true;
         this.runPython(code)
     }

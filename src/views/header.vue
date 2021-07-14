@@ -76,6 +76,7 @@ export default {
   watch: {
     platform: function (event) {
       this.$store.commit("setPlatform", event)
+      this.python.platform = event
     },
     deviceId: function (event) {
       this.$store.commit("setDeviceId", event)
