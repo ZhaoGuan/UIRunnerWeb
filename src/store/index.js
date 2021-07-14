@@ -92,7 +92,7 @@ const store = new Vuex.Store({
         },
         setBaseIosScreenUrl(state, data) {
             localStorage.setItem("BaseIosScreenUrl", data)
-            // state.iosScreenUrl = data
+            state.BaseIosScreenUrl = data
         },
         setLoading(state, data) {
             state.loading = data

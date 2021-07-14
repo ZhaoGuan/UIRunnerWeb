@@ -1,4 +1,7 @@
+import {alertMessage, message} from "@/utils/tools";
+
 export const Python = {}
+
 Python.pyshell = {
     ws: null,
     wsOpen: null,
@@ -57,9 +60,16 @@ Python.initPythonWebSocket = function () {
         this.pyshell.wsOpen = true
         console.log("websocket opened")
     }
-    ws.onmessage = (message) => {
-        const data = JSON.parse(message.data)
-        console.log(data)
+    ws.onmessage = (messageData) => {
+        const data = JSON.parse(messageData.data)
+        console.log("Python Run", data)
+        if (data.status === "SUCCESS") {
+            message("操作执行成功", "请等待页面刷新!")
+            this.callBack()
+        }
+        if (data.status === "FAIL") {
+            alertMessage("操作执行错误", "错误内容" + data.message)
+        }
     }
     ws.onclose = () => {
         this.pyshell.wsOpen = false
@@ -74,20 +84,20 @@ Python.generatePreloadCode = function () {
         codeLines = [
             "import os",
             "from mobile.mobile_driver import MobileDriver",
-            "from commen.action_import import MobileActionImport",
+            "from mobile.mobile_customize_action import MobileCustomize",
             `md = MobileDriver("ios","${deviceUrl}")`,
             "d = md()",
-            "action = MobileActionImport(d())",
-            "d.healthcheck()"
+            "action = MobileCustomize(d)",
+            "d.session_id"
         ]
     } else if (m[1] === "android") {
         codeLines = [
             "import os",
             "from mobile.mobile_driver import MobileDriver",
-            "from commen.action_import import MobileActionImport",
+            "from mobile.mobile_customize_action import MobileCustomize",
             `md = MobileDriver("android","${deviceUrl}")`,
             "d = md()",
-            "action = MobileActionImport(d())",
+            "action = MobileCustomize(d)",
         ]
     } else {
         console.error("Unsupported deviceId", this.deviceId)
@@ -104,7 +114,7 @@ Python.runPython = function (code) {
         this.pyshell.running = true
         this.pyshell.ws.send(JSON.stringify({method: "input", value: code}))
         resolve()
-    }).then(this.callBack)
+    }).then()
 }
 Python.doUnlock = function () {
     const code = `d.unlock()`
@@ -189,7 +199,8 @@ Python.doSwipe = function (begin, end) {
     }
 }
 Python.iOSBack = function () {
-    const code = `d.swipe(0,0.5,0.5,0.5)`
+    // const code = `d.swipe(0,0.5,0.5,0.5)`
+    const code = `action.back()`
     this.runPython(code)
 }
 Python.startApp = function (packName, activity) {

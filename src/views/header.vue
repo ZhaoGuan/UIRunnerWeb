@@ -41,6 +41,8 @@
       <el-col :span="1">
         <el-button size="mini" v-if="platform==='iOS'&&liveScreen" class="btn btn-default" @click="iosLiveScreen">刷新
         </el-button>
+      </el-col>
+      <el-col :span="1">
         <el-button size="mini" type="danger" v-if="pythonReconnect===false" class="btn btn-default"
                    @click="pythonReConnect">
           重连
@@ -170,7 +172,7 @@ export default {
             this.doConnect()
             this.liveScreen = false
           } else {
-            this.$store.commit("setIosScreenUrl", this.$store.getters.getBaseIosScreenUrl + '?random=' + Math.random())
+            this.$store.commit("setIosScreenUrl", this.iosScreenUrl + '?random=' + Math.random())
             this.$store.commit("setLiveScreen", this.liveScreen)
           }
         }
@@ -178,7 +180,7 @@ export default {
 
     },
     iosLiveScreen() {
-      this.$store.commit("setIosScreenUrl", this.$store.getters.getBaseIosScreenUrl + '?random=' + Math.random())
+      this.$store.commit("setIosScreenUrl", this.iosScreenUrl + '?random=' + Math.random())
     }
   }
 }
