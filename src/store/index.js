@@ -157,41 +157,6 @@ const store = new Vuex.Store({
         setIsLoading({commit}) {
             commit("setLoading", true)
         },
-        initPythonWebSocket({commit}) {
-            // 初始化变量
-            const proEnv = require('@/config/pro.env'); // 生产环境
-            const devEnv = require('@/config/dev.env'); // 本地环境
-            let baseUrl = null
-            let host = null
-            switch (process.env.NODE_ENV) {
-                case 'development':
-                    baseUrl = devEnv.baseurl;
-                    break;
-                case 'production':
-                    baseUrl = proEnv.baseurl; //打包完路径
-                    break;
-            }
-            if (baseUrl && baseUrl.includes("http://")) {
-                host = baseUrl.replace("http://", "")
-            }
-            if (baseUrl && baseUrl.includes("https://")) {
-                host = baseUrl.replace("https://", "")
-            }
-            const ws = this.pyshell.ws = new WebSocket("ws://" + host + "/ui/ws/python")
-            ws.onopen = () => {
-                this.pyshell.wsOpen = true
-                commit("setPythonWsOpen", true)
-                console.log("websocket opened")
-            }
-            ws.onmessage = (message) => {
-                const data = JSON.parse(message.data)
-                console.log(data)
-            }
-            ws.onclose = () => {
-                this.pyshell.wsOpen = false
-                commit("setPythonWsOpen", false)
-            }
-        },
         screenRefresh({commit}) {
             if (!this.getters.getLiveScreen) {
                 commit("setLoading", true)
