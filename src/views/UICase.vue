@@ -164,8 +164,8 @@ export default {
         'DESIRED_CAPS':
             {
               'URL': '',
-              'appPackage': 'com.yiding.jianhuo',
-              'appActivity': 'com.yiding.jianhuo.SplashActivity',
+              'appPackage': 'com.pplingo.connect',
+              'appActivity': 'com.pplingo.connect.MainActivity',
               'deviceName': null,
               'passWord': 888888,
               'performance': false,

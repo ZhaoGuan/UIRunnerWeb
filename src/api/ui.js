@@ -26,11 +26,11 @@ export function screenshot(deviceId) {
     })
 }
 
-export function functionList(type) {
+export function functionList(funcType) {
     return request({
         url: '/driver/function/list',
         method: 'get',
-        params: {type}
+        params: {funcType}
     })
 }
 
