@@ -73,8 +73,8 @@
     <el-collapse-item title="动作列表">
       <funcDialog ref="funcDialog"/>
       <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
-      <el-button type="success" size="mini" @click="addElementClick">添加元素点击</el-button>
-      <el-button type="success" size="mini" @click="addTap">添加坐标动作</el-button>
+      <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>
+      <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>
       <el-button type="success" size="mini" @click="clearActionList">清空动作</el-button>
       <el-table
           :data="actionList"

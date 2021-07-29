@@ -184,6 +184,12 @@ Python.doTap = function () {
     this.loading = true;
     this.runPython(code)
 }
+Python.doLocationTap = function () {
+    const code = `action.click_element_rect('${this.nodeSelectedXpath}')`
+    this.nodeSelectedXpath = null;
+    this.loading = true;
+    this.runPython(code)
+}
 Python.doKeyEventNu = function (meta) {
     let code = 'd.shell("input keyevent ' + meta + '")'
     this.loading = true

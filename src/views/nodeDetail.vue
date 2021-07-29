@@ -4,6 +4,7 @@
     <el-row class="panel-heading">
       <el-col :span="12">
         <el-switch v-model="mouseHoverLock" active-text="锁定" inactive-text="解锁"></el-switch>
+
       </el-col>
       <el-col :span="12">
         <el-button size="mini" :disabled="loading" @click="clearCanvas()">
@@ -14,7 +15,7 @@
     <el-row class="panel-body">
       <div class="text-center">
         <el-button size="mini" v-show="platform==='Android'" @click="doUnlock()">Unlock</el-button>
-        <el-button size="mini" @click="doSendKeys('')">Send Keys</el-button>
+        <el-button size="mini" v-show="platform==='Android'" @click="doSendKeys('')">Send Keys</el-button>
         <el-button size="mini" v-show="platform==='Android'" @click="doKeyEventNu('66')">Enter</el-button>
         <el-button size="mini" :disabled="!nodeSelected" @click="doTap()">Tap
         </el-button>
@@ -25,6 +26,9 @@
           Text
         </el-button>
       </div>
+    </el-row>
+    <el-row>
+      <el-checkbox v-model="useFullXpath">强制全路径</el-checkbox>
     </el-row>
     <el-row border=“true”>
       <el-col :span="6">
@@ -52,6 +56,12 @@
       <el-col :span="6"><code>XPathLite</code></el-col>
       <el-col :span="18">
         <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="elemXPathLite"></el-input>
+      </el-col>
+    </el-row>
+    <el-row v-if="useFullXpath">
+      <el-col :span="6"><code>FullXPath</code></el-col>
+      <el-col :span="18">
+        <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="fullElemXPath"></el-input>
       </el-col>
     </el-row>
     <el-row v-if="nodeSelected&&nodeSelected._type!==null">
@@ -88,6 +98,7 @@ export default {
   name: "nodeDetail",
   data() {
     return {
+      useFullXpath: false,
       elem: {
         rect: null
       },
@@ -132,6 +143,9 @@ export default {
     elemXPathLite: function () {
       return elemXPathLite(this.nodes, this.originNodeMaps, this.nodeSelected)
     },
+    fullElemXPath: function () {
+      return elemXPathLite(this.nodes, this.originNodeMaps, this.nodeSelected, false)
+    },
     deviceUrl: function () {
       if (this.platform === 'Android' && this.serial === '') {
         return '';
@@ -165,7 +179,18 @@ export default {
     },
     '$store.state.nodeSelected': function () {
       this.nodeSelected = this.$store.getters.getNodeSelected
-      this.python.nodeSelectedXpath = this.elemXPathLite
+      if (this.useFullXpath) {
+        this.python.nodeSelectedXpath = this.fullElemXPath
+      } else {
+        this.python.nodeSelectedXpath = this.elemXPathLite
+      }
+    },
+    useFullXpath: function () {
+      if (this.useFullXpath) {
+        this.$store.commit("setSelectedElement", this.fullElemXPath)
+      } else {
+        this.$store.commit("setSelectedElement", this.elemXPathLite)
+      }
     }
   },
   methods: {

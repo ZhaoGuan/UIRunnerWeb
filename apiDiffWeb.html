@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+</head>
+<body>
+<div id="app">
+    <el-collapse>
+        <template v-for="requestData in requestList">
+            <el-collapse-item :title="'Timestamp: '+requestData.key">
+                <el-row>
+                    <el-col :span="2">
+                        <el-tag class="tag">METHOD</el-tag>
+                    </el-col>
+                    <el-col>
+                        <el-select size="mini" v-model="requestData.method">
+                            <el-option
+                                    v-for="item in methodOptions"
+                                    :key="item"
+                                    :label="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="2">
+                        <el-tag class="tag">HEADERS</el-tag>
+                    </el-col>
+                    <el-col>
+                        <el-table :data="requestData.headers">
+                            <el-table-column label="KEY">
+                                <template slot-scope="scope">
+                                    <el-input size="mini" v-model="scope.row.key"></el-input>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="VALUE">
+                                <template slot-scope="scope">
+                                    <el-input size="mini" v-model="scope.row.value"></el-input>
+                                </template>
+                            </el-table-column>
+                            <el-table-column width="200" label="ACTION">
+                                <template slot-scope="scope">
+                                    <el-button size="mini" type="success" @click="addHeader(requestData.headers)">+
+                                    </el-button>
+                                    <el-button v-if="requestData.headers.length>1" size="mini" type="danger"
+                                               @click="deleteHeader(requestData.headers,scope.row.index)">-
+                                    </el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="2">
+                        <el-tag class="tag">URL</el-tag>
+                    </el-col>
+                    <el-col>
+                        <el-input size="mini" v-model:auto-complete="requestData.url"></el-input>
+                    </el-col>
+                </el-row>
+                <el-row v-if="requestData.method!=='get'">
+                    <el-col :span="2">
+                        <el-tag class="tag">JSON BODY</el-tag>
+                    </el-col>
+                    <el-col>
+                        <el-input type="textarea"
+                                  :autosize="{ minRows: 2, maxRows: 4}"
+                                  placeholder="请输入JSON结构数据" v-model:auto-complete="requestData.json"
+                                  @blur="jsonCheck(requestData.key,requestData.json)"></el-input>
+                    </el-col>
+                </el-row>
+                <el-button v-if="requestList.length>1" size="mini" type="danger"
+                           @click="deleteRequestData(requestData)">
+                    删除
+                </el-button>
+            </el-collapse-item>
+        </template>
+    </el-collapse>
+    <el-button type="success" size="mini" @click="createRequestData">创建新请求</el-button>
+    <el-button type="primary" size="mini" @click="doRequests">对比请求</el-button>
+    <el-checkbox v-model="costTime">是否对比时间</el-checkbox>
+    <el-collapse>
+        <el-collapse-item title="请求结果">
+            <el-table :data="requestResult" style="width: 100%">
+                <el-table-column label="Tag" prop="tag" width="200"></el-table-column>
+                <el-table-column v-if="costTime" label="Cost Time" prop="time" width="100"></el-table-column>
+                <el-table-column label="Response" prop="response">
+                    <template slot-scope="scope">
+                        <div :id="'diff'+scope.row.tag" style="white-space: pre-wrap"></div>
+                        <!--                        <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4}"-->
+                        <!--                                  v-model="scope.row.response"></el-input>-->
+                    </template>
+                </el-table-column>
+                <!--                <el-table-column label="Headers" prop="headers">-->
+                <!--                    <template slot-scope="scope">-->
+                <!--                        <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4}"-->
+                <!--                                  v-model="scope.row.headers"></el-input>-->
+                <!--                    </template>-->
+                <!--                </el-table-column>-->
+            </el-table>
+        </el-collapse-item>
+    </el-collapse>
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--json diff-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsondiffpatch@0.4.1/dist/formatters-styles/html.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/jsondiffpatch@0.4.1/dist/jsondiffpatch.umd.slim.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                costTime: false,
+                host: "http://192.168.23.253:8000",
+                taskPath: "/response/post",
+                taskResultPath: "",
+                activeNames: ["1"],
+                methodOptions: ["get", "post", "delete", "put", "option"],
+                baseData: {
+                    key: null,
+                    method: "get",
+                    headers: [{key: null, value: null}],
+                    url: null,
+                    json: null
+                },
+                baseName: "key",
+                requestList: [],
+                // 用于确定显示顺序
+                tagList: [],
+                requestResult: [],
+                taskId: null
+            }
+        },
+        created() {
+        },
+        mounted() {
+            if (this.requestList.length === 0) {
+                this.requestList.push(this.addNewBaseData())
+            }
+            // Task Result Timer
+            this.TaskTimer = setInterval(this.getTaskResult, 5000)
+        },
+        methods: {
+            addHeader(dataList) {
+                dataList.push({key: null, value: null})
+            },
+            deleteHeader(dataList, index) {
+                dataList.splice(index, 1)
+            },
+            addNewBaseData() {
+                const tempData = JSON.parse(JSON.stringify(this.baseData))
+                tempData.key = new Date().getTime()
+                return tempData
+            },
+            createRequestData() {
+                this.requestList.push(this.addNewBaseData())
+            },
+            deleteRequestData(data) {
+                this.requestList.splice(this.requestList.indexOf(data), 1)
+            },
+            jsonCheck(key, data) {
+                let jsonData = null
+                if (data === null || data === "") {
+                    return null
+                }
+                try {
+                    jsonData = JSON.parse(data)
+                } catch (e) {
+                    this.$notify.error({
+                        title: 'Json 格式错误',
+                        message: "Timestamp: " + key + " 中的格式错误请修改",
+                        duration: 0
+                    });
+                }
+                return jsonData
+            },
+            beautyJson(data) {
+                let result
+                try {
+                    result = JSON.stringify(data, null, 2);
+                } catch (e) {
+                    result = data
+                }
+                return result
+            },
+            doRequests() {
+                let body = {}
+                this.requestResult = []
+                for (const index in this.requestList) {
+                    const temp = this.requestList[index]
+                    if (temp.url === null || temp.url === "") {
+                        continue
+                    }
+                    const tag = temp.key
+                    let headers = {}
+                    for (const headerIndex in temp.headers) {
+                        const tempHeader = temp.headers[headerIndex]
+                        if (tempHeader.key !== null && tempHeader.key !== "") {
+                            headers[tempHeader.key] = tempHeader.value
+                        }
+                    }
+                    if (Object.keys(headers).length === 0) {
+                        headers = null
+                    }
+                    const jsonData = this.jsonCheck(temp.key, temp.json)
+                    body[tag] = {
+                        istime: this.costTime,
+                        headers: headers,
+                        url: temp.url,
+                        json: jsonData,
+                        method: temp.method
+                    }
+                }
+                if (body !== {}) {
+                    axios(
+                        {
+                            method: 'post',
+                            url: this.host + this.taskPath,
+                            data: body
+                        }
+                    ).then(response => {
+                        for (const key in response.data) {
+                            const temp = response.data[key]
+                            let isJson
+                            try {
+                                JSON.stringify(temp.response)
+                                isJson = true
+                            } catch (e) {
+                                isJson = false
+                            }
+                            this.requestResult.push({
+                                tag: key,
+                                response: temp.response,
+                                time: temp.time + "ms",
+                                isJson: isJson,
+                                headers: temp.headers,
+                            })
+                        }
+                        this.$nextTick(function () {
+                            this.diffHtml()
+                        })
+                        // 任务ID
+                        // this.taskId = response.data
+                    })
+
+                }
+            },
+            diffHtml() {
+                let baseResponse = null
+                for (const i in this.requestResult) {
+                    const temp = this.requestResult[i]
+                    console.log(temp)
+                    if (baseResponse === null && temp.isJson) {
+                        baseResponse = temp.response
+                    }
+                    if (baseResponse !== null) {
+                        let delta = jsondiffpatch.diff(baseResponse, temp.response)
+                        if (delta === undefined) {
+                            document.getElementById("diff" + temp.tag).innerHTML = this.beautyJson(temp.response)
+                        } else {
+                            document.getElementById("diff" + temp.tag).innerHTML = jsondiffpatch.formatters.html.format(delta, baseResponse)
+                        }
+                        console.log(delta)
+
+                    }
+                }
+            },
+            getTaskResult() {
+                if (this.taskId === null) {
+                    axios(
+                        {
+                            method: 'post',
+                            url: this.host + this.taskResultPath,
+                            data: body
+                        }
+                    ).then(response => {
+                        if (response.code === 200 && response.data === null) {
+                            this.taskId = null
+                            for (const key in response.data) {
+                                const temp = response.data[key]
+                                let isJson
+                                try {
+                                    JSON.stringify(temp.response)
+                                    isJson = true
+                                } catch (e) {
+                                    isJson = false
+                                }
+                                this.requestResult.push({
+                                    tag: key,
+                                    response: temp.response,
+                                    time: temp.time + "ms",
+                                    isJson: isJson,
+                                    headers: temp.headers,
+                                })
+                            }
+                            this.$nextTick(function () {
+                                this.diffHtml()
+                            })
+                        }
+                    })
+                }
+            }
+        }
+    })
+</script>
+<style>
+    .tag {
+        width: 100%;
+        text-align: center
+    }
+</style>
+</html>

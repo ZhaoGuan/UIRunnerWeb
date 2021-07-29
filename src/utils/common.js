@@ -80,7 +80,7 @@ export function nodesMap(source) {
     return nodesMap
 }
 
-export function elemXPathLite(nodes, originNodeMaps, element) {
+export function elemXPathLite(nodes, originNodeMaps, element, XPathLite = true) {
     let mapAttrCount = {}
 
     function incrAttrCount(collectionKey, key) {
@@ -110,19 +110,19 @@ export function elemXPathLite(nodes, originNodeMaps, element) {
     let array = [];
     while (node && node.parentId) {
         const parent = originNodeMaps[node.parentId]
-        if (getAttrCount("label", node.label) === 1) {
+        if (getAttrCount("label", node.label) === 1 && XPathLite) {
             array.push(`*[@label="${node.label}"]`)
             break
-        } else if (getAttrCount("resourceId", node.resourceId) === 1) {
+        } else if (getAttrCount("resourceId", node.resourceId) === 1 && XPathLite) {
             array.push(`*[@resource-id="${node.resourceId}"]`)
             break
-        } else if (getAttrCount("text", node.text) === 1) {
+        } else if (getAttrCount("text", node.text) === 1 && XPathLite) {
             array.push(`*[@text="${node.text}"]`)
             break
-        } else if (getAttrCount("description", node.description) === 1) {
+        } else if (getAttrCount("description", node.description) === 1 && XPathLite) {
             array.push(`*[@content-desc="${node.description}"]`)
             break
-        } else if (getAttrCount("_type", node._type) === 1) {
+        } else if (getAttrCount("_type", node._type) === 1 && XPathLite) {
             array.push(`${node._type}`)
             break
         } else if (!parent) {
