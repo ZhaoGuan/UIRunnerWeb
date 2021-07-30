@@ -233,6 +233,6 @@ Python.startApp = function (packName, activity) {
     this.runPython(code)
 }
 Python.androidUnlock = function (passWord) {
-    const code = `md.android_unlock(${passWord})`
+    const code = `md.android_unlock('${passWord}')`
     this.runPython(code)
 }

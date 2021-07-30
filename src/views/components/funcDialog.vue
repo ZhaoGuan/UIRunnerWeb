@@ -21,7 +21,7 @@
         <el-switch v-if="key.substring(0,3)==='is_'" v-model="funcParams[key]" active-text="false"
                    inactive-text="true"/>
         <fucSelect v-else-if="key==='func'" ref="fucSelect"/>
-        <el-input v-else-if="key==='location'" size="mine" :disabled="true"
+        <el-input v-else-if="key==='location'" size="mine"
                   :value="$store.getters.getSelectedElement"></el-input>
         <el-input v-else-if="key==='params'" size="mine" :disabled="true" value="参数为所选方法参数"></el-input>
         <el-input v-else size="mini" v-model="funcParams[key]"></el-input>
