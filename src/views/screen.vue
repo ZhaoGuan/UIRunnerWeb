@@ -541,7 +541,8 @@ export default {
           that.drawRefresh()
           that.$store.commit("setNodeSelectedId", nodeHovered._id)
           that.$store.commit("setNodeSelected", nodeHovered)
-          that.$store.commit("setSelectedElement", elemXPathLite(that.nodesList, that.originNodeMaps, nodeHovered))
+          that.$store.commit("setSelectedElementXpathLite", elemXPathLite(that.nodesList, that.originNodeMaps, nodeHovered))
+          that.$store.commit("setSelectedElementXpath", elemXPathLite(that.nodesList, that.originNodeMaps, nodeHovered, false))
         }
         element.removeEventListener('mouseleave', mouseHoverLeaveListener);
         element.removeEventListener('mousemove', mouseHoverListener);

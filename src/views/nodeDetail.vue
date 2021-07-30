@@ -186,11 +186,8 @@ export default {
       }
     },
     useFullXpath: function () {
-      if (this.useFullXpath) {
-        this.$store.commit("setSelectedElement", this.fullElemXPath)
-      } else {
-        this.$store.commit("setSelectedElement", this.elemXPathLite)
-      }
+      console.log("use", this.useFullXpath)
+      this.$store.commit("setIsUseFullXpath", this.useFullXpath)
     }
   },
   methods: {

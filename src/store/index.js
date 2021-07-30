@@ -31,7 +31,9 @@ const store = new Vuex.Store({
         cursor: null,
         nodeSelected: null,
         nodeSelectedId: null,
-        selectedElement: null,
+        isUseFullXpath: false,
+        selectedElementXpathLite: null,
+        selectedElementXpath: null,
         funDocList: null,
         tapPoint: null,
         actionList: [],
@@ -58,7 +60,16 @@ const store = new Vuex.Store({
         getCursor: state => state.cursor,
         getNodeSelected: state => state.nodeSelected,
         getNodeSelectedId: state => state.nodeSelectedId,
-        getSelectedElement: state => state.selectedElement,
+        getIsUseFullXpath: state => state.isUseFullXpath,
+        getSelectedElementXpathLite: state => state.selectedElementXpathLite,
+        getSelectedElementXpath: state => state.selectedElementXpath,
+        getSelectedElement: state => {
+            if (state.isUseFullXpath) {
+                return state.selectedElementXpath
+            } else {
+                return state.selectedElementXpathLite
+            }
+        },
         getWindowSize: state => state.windowSize,
         getFuncDocList: state => state.funDocList,
         getTapPoint: state => state.tapPoint,
@@ -127,8 +138,14 @@ const store = new Vuex.Store({
         setNodeSelectedId(state, data) {
             state.nodeSelectedId = data
         },
-        setSelectedElement(state, data) {
-            state.selectedElement = data
+        setIsUseFullXpath(state, data) {
+            state.isUseFullXpath = data
+        },
+        setSelectedElementXpathLite(state, data) {
+            state.selectedElementXpathLite = data
+        },
+        setSelectedElementXpath(state, data) {
+            state.selectedElementXpath = data
         },
         setWindowSize(state, data) {
             state.windowSize = data
