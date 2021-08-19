@@ -1,10 +1,9 @@
 <template>
   <el-card shadow="hover">
-    <el-row><label>所选元素属性</label></el-row>
+    <label>所选元素属性</label>
     <el-row class="panel-heading">
       <el-col :span="12">
         <el-switch v-model="mouseHoverLock" active-text="锁定" inactive-text="解锁"></el-switch>
-
       </el-col>
       <el-col :span="12">
         <el-button size="mini" :disabled="loading" @click="clearCanvas()">
@@ -28,8 +27,41 @@
       </div>
     </el-row>
     <el-row>
+      <el-col :span="1">
+        <el-popover
+            placement="top-start"
+            title="正则方法"
+            :width="200"
+            trigger="hover"
+            content='以内容为开头starts-with,包含内容contains.例如://节点名[starts-with(@元素名, "正则内容")]'
+        >
+          <template #reference>
+            <el-button type="danger" size="mini" circle></el-button>
+          </template>
+        </el-popover>
+      </el-col>
+      <el-col :offset="1" :span="22">
+        <el-input size="mini" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="testLocation"></el-input>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="6">
+        <el-button size="mini" type="info" @click="toTestLocation">测试</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-button size="mini" type="success" @click="clickTestLocation">点击</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-button size="mini" type="primary" @click="saveTestLocation">保存</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-button size="mini" type="danger" @click="clearTestLocation">清空</el-button>
+      </el-col>
+    </el-row>
+    <el-row>
       <el-checkbox v-model="useFullXpath">强制全路径</el-checkbox>
     </el-row>
+    <el-row></el-row>
     <el-row border=“true”>
       <el-col :span="6">
         <el-checkbox v-model="showCursorPercent">点击坐标</el-checkbox>
@@ -111,6 +143,7 @@ export default {
       showCursorPercent: true,
       mapAttrCount: {},
       originNodeMaps: null,
+      testLocation: null,
       nodeSelected: null,
       platform: this.$store.getters.getPlatform,
       loading: this.$store.getters.getLoading,
@@ -179,6 +212,7 @@ export default {
     },
     '$store.state.nodeSelected': function () {
       this.nodeSelected = this.$store.getters.getNodeSelected
+      this.testLocation = this.elemXPathLite
       if (this.useFullXpath) {
         this.python.nodeSelectedXpath = this.fullElemXPath
       } else {
@@ -186,11 +220,19 @@ export default {
       }
     },
     useFullXpath: function () {
-      console.log("use", this.useFullXpath)
       this.$store.commit("setIsUseFullXpath", this.useFullXpath)
     }
   },
   methods: {
+    toTestLocation() {
+      this.python.findElement(this.testLocation)
+    },
+    saveTestLocation() {
+      this.$store.commit("setTestLocation", this.testLocation)
+    },
+    clearTestLocation() {
+      this.$store.commit("setTestLocation", null)
+    },
     filterAttributeKeys(elem) {
       return Object.keys(elem).filter(k => {
         if (['children', 'rect', "parent", "parentId"].includes(k)) {
@@ -220,6 +262,8 @@ export default {
       this.python.doClear()
     }, doPositionTap(x, y) {
       this.python.doPositionTap(x, y)
+    }, clickTestLocation() {
+      this.python.doClick(this.testLocation)
     }
   }
 }

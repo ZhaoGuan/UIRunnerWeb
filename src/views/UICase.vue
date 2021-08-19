@@ -72,10 +72,28 @@
     </el-collapse-item>
     <el-collapse-item title="动作列表">
       <funcDialog ref="funcDialog"/>
-      <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
-      <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>
-      <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>
-      <el-button type="success" size="mini" @click="clearActionList">清空动作</el-button>
+      <el-col :span="6">
+        <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-popover
+            placement="top-start"
+            title="规则"
+            :width="50"
+            trigger="hover"
+            content='如果保存了自定义路径则会使用自定义路径'
+        >
+          <template #reference>
+            <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>
+          </template>
+        </el-popover>
+      </el-col>
+      <el-col :span="6">
+        <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-button type="success" size="mini" @click="clearActionList">清空动作</el-button>
+      </el-col>
       <el-table
           :data="actionList"
           stripe
@@ -88,11 +106,6 @@
             prop="TYPE"
             label="方法"
         />
-        <!--        <el-table-column-->
-        <!--            label="DATA"-->
-        <!--        >-->
-        <!--          <template slot-scope="scope">{{ scope.row.DATA }}</template>-->
-        <!--        </el-table-column>-->
         <el-table-column label="操作" width="250">
           <template slot-scope="scope">
             <el-button size="mini" icon="el-icon-arrow-up"
@@ -101,9 +114,13 @@
             <el-button size="mini" icon="el-icon-arrow-down"
                        @click="actionDown(scope.row)">
             </el-button>
+            <!--            <el-button size="mini" type="success"-->
+            <!--                       @click="editAction(scope.row)">EDIT-->
+            <!--            </el-button>-->
             <el-button size="mini" type="danger"
                        @click="deleteAction(scope.row)">DELETE
             </el-button>
+
           </template>
         </el-table-column>
       </el-table>
@@ -227,7 +244,6 @@ export default {
   methods: {
     unlockDevice() {
       this.python.androidUnlock(this.template.DESIRED_CAPS.passWord)
-
     },
     startApp() {
       const appPackage = this.template.DESIRED_CAPS.appPackage
@@ -257,7 +273,10 @@ export default {
       this.$store.commit("setSaveAlertClose", JSON.stringify(this.alertCloseList))
     },
     addElementClick() {
-      const element = this.$store.getters.getSelectedElement
+      let element = this.$store.getters.getTestLocation
+      if (this.$store.getters.getTestLocation === null) {
+        element = this.$store.getters.getSelectedElement
+      }
       if (element === null) {
         return
       }
@@ -285,6 +304,9 @@ export default {
     clearActionList() {
       this.$store.commit("setActionList", [])
       this.debugTaskResult = null
+    },
+    editAction(data) {
+      this.$refs.funcDialog.updateDialog(data)
     },
     deleteAction(data) {
       this.actionList.splice(this.actionList.indexOf(data), 1)
@@ -388,6 +410,7 @@ export default {
       downloadFileHelper(caseResult.TITLE, yaml_data)
     },
     runCase() {
+      this.debugTaskResult = null
       const caseResult = this.getCase()
       if (!caseResult) {
         return

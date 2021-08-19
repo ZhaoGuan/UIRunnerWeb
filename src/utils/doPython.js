@@ -236,3 +236,11 @@ Python.androidUnlock = function (passWord) {
     const code = `md.android_unlock('${passWord}')`
     this.runPython(code)
 }
+Python.findElement = function (location) {
+    const code = `action.wait_element('${location}')`
+    this.runPython(code)
+}
+Python.doClick = function (location) {
+    const code = `action.click_element('${location}')`
+    this.runPython(code)
+}

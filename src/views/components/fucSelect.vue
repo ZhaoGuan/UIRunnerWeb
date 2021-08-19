@@ -16,8 +16,8 @@
     <el-form-item v-for="(key) in funcData.params" v-bind:key="key" :label="key">
       <el-switch v-if="key.substring(0,3)==='is_'" v-model.trim="funcParams[key]" active-text="true"
                  inactive-text="false"/>
-      <el-input v-else-if="key==='location'" size="mine" :disabled="true"
-                :value="$store.getters.getSelectedElement"></el-input>
+      <el-input v-else-if="key==='location'" size="mine"
+                v-model="elementLocation"></el-input>
       <el-input v-else size="mini" v-model.trim="funcParams[key]"></el-input>
     </el-form-item>
   </el-form>
@@ -32,9 +32,19 @@ export default {
       func: null,
       funcParams: {},
       actionName: null,
+      testLocation: false,
+      useTestLocation: null
     }
-  }, watch: {}
+  }, watch: {
+  }
   , computed: {
+    elementLocation() {
+      if (this.useTestLocation) {
+        return this.testLocation
+      } else {
+        return this.$store.getters.getSelectedElement
+      }
+    },
     funcData() {
       if (this.func) {
         return this.funcMap[this.func]
@@ -73,9 +83,12 @@ export default {
       this.$forceUpdate()
     },
     getFuncParams() {
-      console.log(this.funcParams)
       if (this.funcData.params.includes("location")) {
-        this.funcParams.location = this.$store.getters.getSelectedElement
+        if (this.useTestLocation) {
+          this.funcParams.location = this.testLocation
+        } else {
+          this.funcParams.location = this.$store.getters.getSelectedElement
+        }
       }
       return this.funcParams
     }

@@ -39,6 +39,7 @@ const store = new Vuex.Store({
         actionList: [],
         mouseHoverLock: false,
         alertClose: [],
+        testLocation: null,
         saveAlertClose: localStorage.saveAlertClose || ""
     },
     getters: {
@@ -76,8 +77,8 @@ const store = new Vuex.Store({
         getActionList: state => state.actionList,
         getMouseHoverLock: state => state.mouseHoverLock,
         getAlertClose: state => state.alertClose,
-        getSaveAlertClose: state => state.saveAlertClose
-
+        getSaveAlertClose: state => state.saveAlertClose,
+        getTestLocation: state => state.testLocation
     },
     mutations: {
         setDeviceUrl(state, data) {
@@ -167,6 +168,9 @@ const store = new Vuex.Store({
         },
         setSaveAlertClose(state, data) {
             localStorage.setItem("saveAlertClose", data)
+        },
+        setTestLocation(state, data) {
+            state.testLocation = data
         }
     },
     modules: {},

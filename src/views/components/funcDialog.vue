@@ -4,6 +4,10 @@
       <el-form-item label="动作名称">
         <el-input v-model.trim="actionName">动作名称</el-input>
       </el-form-item>
+      <el-form-item v-if="testLocation" label="自定义定位">
+        <el-checkbox v-model="useTestLocation">是否使用自定义路径</el-checkbox>
+        <el-input size="mini" :value="testLocation"></el-input>
+      </el-form-item>
       <el-form-item label="选择方法">
         <el-select v-model="func" placeholder="请选择" style="width: 100%">
           <el-option
@@ -22,13 +26,14 @@
                    inactive-text="true"/>
         <fucSelect v-else-if="key==='func'" ref="fucSelect"/>
         <el-input v-else-if="key==='location'" size="mine"
-                  :value="$store.getters.getSelectedElement"></el-input>
+                  v-model="elementLocation"></el-input>
         <el-input v-else-if="key==='params'" size="mine" :disabled="true" value="参数为所选方法参数"></el-input>
         <el-input v-else size="mini" v-model="funcParams[key]"></el-input>
       </el-form-item>
     </el-form>
     <el-row>
-      <el-button type="success" @click="addAction">添加动作</el-button>
+      <el-button v-if="isAdd" type="success" @click="addAction">添加动作</el-button>
+      <el-button v-else type="success" @click="updateAction">更新动作</el-button>
       <el-button type="danger" @click="closeDialog">取消</el-button>
     </el-row>
   </el-dialog>
@@ -42,18 +47,36 @@ export default {
   components: {fucSelect},
   data() {
     return {
+      useTestLocation: false,
       funcDialog: false,
       func: null,
       funcParams: {},
       actionName: null,
-
+      isAdd: true,
     }
   },
   created() {
     this.$store.dispatch("getFuncDocList")
   },
-  watch: {},
+  watch: {
+    useTestLocation(event) {
+      if (this.$refs.fucSelect && this.$refs.fucSelect[0]) {
+        this.$refs.fucSelect[0].useTestLocation = event
+        this.$refs.fucSelect[0].testLocation = this.$store.getters.getTestLocation
+      }
+    }
+  },
   computed: {
+    testLocation() {
+      return this.$store.getters.getTestLocation
+    },
+    elementLocation() {
+      if (this.useTestLocation) {
+        return this.testLocation
+      } else {
+        return this.$store.getters.getSelectedElement
+      }
+    },
     funcList() {
       return this.$store.getters.getFuncDocList
     },
@@ -77,6 +100,13 @@ export default {
     openDialog() {
       this.funcDialog = true
     },
+    updateDialog(data) {
+      this.funcDialog = true
+      this.isAdd = false
+      this.actionName = data.NAME
+      this.func = data.TYPE
+      this.funcParams = data.DATA
+    },
     closeDialog() {
       this.funcDialog = false
     },
@@ -84,6 +114,7 @@ export default {
       this.actionName = null
       this.funcParams = {}
       this.func = null
+      this.isAdd = true
     },
     addAction() {
       if (this.funcData.params.includes("func")) {
@@ -92,10 +123,14 @@ export default {
         this.funcParams.params = funcSelect.getFuncParams()
       }
       if (this.funcData.params.includes("location")) {
-        this.funcParams.location = this.$store.getters.getSelectedElement
+        if (this.useTestLocation) {
+          this.funcParams.location = this.testLocation
+        } else {
+          this.funcParams.location = this.$store.getters.getSelectedElement
+        }
       }
-      const actionList = this.$store.getters.getActionList
       console.log(this.funcParams)
+      const actionList = this.$store.getters.getActionList
       actionList.push({
         'NAME': this.actionName,
         'TYPE': this.func,
@@ -103,6 +138,9 @@ export default {
       })
       this.$store.commit("setActionList", actionList)
       this.closeDialog()
+    },
+    updateAction() {
+
     }
   }
 }
