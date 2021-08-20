@@ -32,15 +32,15 @@ export default {
       func: null,
       funcParams: {},
       actionName: null,
-      testLocation: false,
-      useTestLocation: null
+      customizeLocation: false,
+      useCustomizeLocation: null
     }
   }, watch: {
   }
   , computed: {
     elementLocation() {
-      if (this.useTestLocation) {
-        return this.testLocation
+      if (this.useCustomizeLocation) {
+        return this.customizeLocation
       } else {
         return this.$store.getters.getSelectedElement
       }
@@ -84,8 +84,8 @@ export default {
     },
     getFuncParams() {
       if (this.funcData.params.includes("location")) {
-        if (this.useTestLocation) {
-          this.funcParams.location = this.testLocation
+        if (this.useCustomizeLocation) {
+          this.funcParams.location = this.customizeLocation
         } else {
           this.funcParams.location = this.$store.getters.getSelectedElement
         }

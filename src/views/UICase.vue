@@ -273,8 +273,8 @@ export default {
       this.$store.commit("setSaveAlertClose", JSON.stringify(this.alertCloseList))
     },
     addElementClick() {
-      let element = this.$store.getters.getTestLocation
-      if (this.$store.getters.getTestLocation === null) {
+      let element = this.$store.getters.getCustomizeLocation
+      if (this.$store.getters.getCustomizeLocation === null) {
         element = this.$store.getters.getSelectedElement
       }
       if (element === null) {

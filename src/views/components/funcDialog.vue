@@ -4,9 +4,9 @@
       <el-form-item label="动作名称">
         <el-input v-model.trim="actionName">动作名称</el-input>
       </el-form-item>
-      <el-form-item v-if="testLocation" label="自定义定位">
-        <el-checkbox v-model="useTestLocation">是否使用自定义路径</el-checkbox>
-        <el-input size="mini" :value="testLocation"></el-input>
+      <el-form-item v-if="customizeLocation" label="自定义定位">
+        <el-checkbox v-model="useCustomizeLocation">是否使用自定义路径</el-checkbox>
+        <el-input size="mini" :value="customizeLocation"></el-input>
       </el-form-item>
       <el-form-item label="选择方法">
         <el-select v-model="func" placeholder="请选择" style="width: 100%">
@@ -47,7 +47,7 @@ export default {
   components: {fucSelect},
   data() {
     return {
-      useTestLocation: false,
+      useCustomizeLocation: false,
       funcDialog: false,
       func: null,
       funcParams: {},
@@ -59,20 +59,20 @@ export default {
     this.$store.dispatch("getFuncDocList")
   },
   watch: {
-    useTestLocation(event) {
+    useCustomizeLocation(event) {
       if (this.$refs.fucSelect && this.$refs.fucSelect[0]) {
-        this.$refs.fucSelect[0].useTestLocation = event
-        this.$refs.fucSelect[0].testLocation = this.$store.getters.getTestLocation
+        this.$refs.fucSelect[0].useCustomizeLocation = event
+        this.$refs.fucSelect[0].customizeLocation = this.$store.getters.getCustomizeLocation
       }
     }
   },
   computed: {
-    testLocation() {
-      return this.$store.getters.getTestLocation
+    customizeLocation() {
+      return this.$store.getters.getCustomizeLocation
     },
     elementLocation() {
-      if (this.useTestLocation) {
-        return this.testLocation
+      if (this.useCustomizeLocation) {
+        return this.customizeLocation
       } else {
         return this.$store.getters.getSelectedElement
       }
@@ -123,8 +123,8 @@ export default {
         this.funcParams.params = funcSelect.getFuncParams()
       }
       if (this.funcData.params.includes("location")) {
-        if (this.useTestLocation) {
-          this.funcParams.location = this.testLocation
+        if (this.useCustomizeLocation) {
+          this.funcParams.location = this.customizeLocation
         } else {
           this.funcParams.location = this.$store.getters.getSelectedElement
         }

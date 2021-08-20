@@ -27,6 +27,9 @@
       </div>
     </el-row>
     <el-row>
+      <el-col :offset="2" :span="5"><code>自定义路径</code></el-col>
+    </el-row>
+    <el-row>
       <el-col :span="1">
         <el-popover
             placement="top-start"
@@ -41,7 +44,8 @@
         </el-popover>
       </el-col>
       <el-col :offset="1" :span="22">
-        <el-input size="mini" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="testLocation"></el-input>
+        <el-input size="mini" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }"
+                  v-model="customizeLocation"></el-input>
       </el-col>
     </el-row>
     <el-row>
@@ -143,7 +147,7 @@ export default {
       showCursorPercent: true,
       mapAttrCount: {},
       originNodeMaps: null,
-      testLocation: null,
+      customizeLocation: null,
       nodeSelected: null,
       platform: this.$store.getters.getPlatform,
       loading: this.$store.getters.getLoading,
@@ -212,7 +216,7 @@ export default {
     },
     '$store.state.nodeSelected': function () {
       this.nodeSelected = this.$store.getters.getNodeSelected
-      this.testLocation = this.elemXPathLite
+      this.customizeLocation = this.elemXPathLite
       if (this.useFullXpath) {
         this.python.nodeSelectedXpath = this.fullElemXPath
       } else {
@@ -225,10 +229,10 @@ export default {
   },
   methods: {
     toTestLocation() {
-      this.python.findElement(this.testLocation)
+      this.python.findElement(this.customizeLocation)
     },
     saveTestLocation() {
-      this.$store.commit("setTestLocation", this.testLocation)
+      this.$store.commit("setTestLocation", this.customizeLocation)
     },
     clearTestLocation() {
       this.$store.commit("setTestLocation", null)
@@ -263,7 +267,7 @@ export default {
     }, doPositionTap(x, y) {
       this.python.doPositionTap(x, y)
     }, clickTestLocation() {
-      this.python.doClick(this.testLocation)
+      this.python.doClick(this.customizeLocation)
     }
   }
 }

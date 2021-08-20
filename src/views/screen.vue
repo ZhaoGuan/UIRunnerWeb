@@ -167,6 +167,7 @@ export default {
         img.onload = function () {
           canvas.width = img.width
           canvas.height = img.height
+          console.log(canvas)
           ctx.drawImage(img, 0, 0, img.width, img.height);
           self.resizeScreen(img);
 
@@ -276,8 +277,11 @@ export default {
       let BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
       let img = this.imagePool();
       img.onload = function () {
+
         fgcanvas.width = bgcanvas.width = img.width
         fgcanvas.height = bgcanvas.height = img.height
+        console.log(bgcanvas)
+        console.log(fgcanvas)
         ctx.drawImage(img, 0, 0, img.width, img.height);
         that.resizeScreen(img);
         // Try to forcefully clean everything to get rid of memory
