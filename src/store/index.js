@@ -24,6 +24,7 @@ const store = new Vuex.Store({
         PythonWsOpen: null,
         hierarchy: null,
         jsonHierarchy: null,
+        resetHierarchy: 0,
         activity: null,
         packageName: null,
         windowSize: null,
@@ -53,6 +54,7 @@ const store = new Vuex.Store({
         getLoading: state => state.loading,
         getLiveScreen: state => state.liveScreen,
         getJsonHierarchy: state => state.jsonHierarchy,
+        getResetHierarchy: state => state.resetHierarchy,
         getImgBlob: state => state.imgBlob,
         getActivity: state => state.activity,
         getXpath: state => state.xpath,
@@ -114,6 +116,9 @@ const store = new Vuex.Store({
         },
         setJsonHierarchy(state, data) {
             state.jsonHierarchy = data
+        },
+        setRestHierarchy(state, data) {
+            state.resetHierarchy = data
         },
         setActivity(state, data) {
             state.activity = data

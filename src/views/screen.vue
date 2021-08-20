@@ -45,6 +45,7 @@ export default {
       canvasStyle: {
         opacity: 1,
         width: '100%',
+        // height: '100%'
       },
       lastScreenSize: {
         screen: {},
@@ -118,7 +119,10 @@ export default {
     "$store.state.nodeSelected": function () {
       this.nodeSelected = this.$store.getters.getNodeSelected
       this.drawRefresh()
-    }
+    },
+    "$store.state.resetHierarchy": function () {
+      this.reFlashHierarchy()
+    },
   },
   computed: {
     deviceUrl() {
@@ -153,13 +157,10 @@ export default {
       const canvas = document.getElementById('bgCanvas')
       const ctx = canvas.getContext('2d');
       this.screenWebSocket = ws;
-
-
       ws.onopen = function () {
         console.log('screen websocket connected')
       };
       ws.onmessage = function (message) {
-        console.log("New message");
         let blob = new Blob([message.data], {
           type: 'image/jpeg'
         })
@@ -167,7 +168,6 @@ export default {
         img.onload = function () {
           canvas.width = img.width
           canvas.height = img.height
-          console.log(canvas)
           ctx.drawImage(img, 0, 0, img.width, img.height);
           self.resizeScreen(img);
 
@@ -266,6 +266,15 @@ export default {
       }
     }
     ,
+    reFlashHierarchy() {
+      const windowSize = this.$store.getters.getWindowSize
+      const width = windowSize[0]
+      const height = windowSize[1]
+      // this.canvas.bg.width = width
+      // this.canvas.bg.height = height
+      this.canvas.fg.width = width
+      this.canvas.fg.height = height
+    },
     drawBlobImageToScreen(blob) {
       const that = this
       let url = null
@@ -277,13 +286,12 @@ export default {
       let BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
       let img = this.imagePool();
       img.onload = function () {
-
         fgcanvas.width = bgcanvas.width = img.width
         fgcanvas.height = bgcanvas.height = img.height
+        that.resizeScreen(img)
         console.log(bgcanvas)
         console.log(fgcanvas)
         ctx.drawImage(img, 0, 0, img.width, img.height);
-        that.resizeScreen(img);
         // Try to forcefully clean everything to get rid of memory
         // leaks. Note that despite this effort, Chrome will still
         // leak huge amounts of memory when the developer tools are

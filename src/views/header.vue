@@ -35,6 +35,22 @@
         </el-button>
       </el-col>
       <el-col :span="2">
+        <el-popover
+            placement="top-start"
+            title="备注"
+            :width="200"
+            trigger="hover"
+            content='主要用于横屏兼容问题，用于强制刷新页面结构。现在发现截屏问题Redmi截图直接是一半黑屏.....'
+        >
+          <template #reference>
+            <el-button size="mini" style="width:100%"
+                       @click="setRestHierarchy">Reset Hierarchy
+            </el-button>
+          </template>
+        </el-popover>
+
+      </el-col>
+      <el-col :span="2">
         <el-switch v-model="liveScreen" active-text="实时" inactive-text="静态" @change="liveDevice">
         </el-switch>
       </el-col>
@@ -156,6 +172,10 @@ export default {
     dumpHierarchyWithScreen() {
       this.$store.dispatch("screenRefresh")
       this.$store.dispatch("hierarchyRefresh")
+    },
+    setRestHierarchy() {
+      let count = this.$store.getters.getResetHierarchy
+      this.$store.commit("setRestHierarchy", count += 1)
     },
     liveDevice() {
       switch (this.$store.getters.getPlatform) {
