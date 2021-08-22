@@ -24,6 +24,7 @@
 <script>
 import {nodesMap} from "@/utils/common";
 import {Python} from "@/utils/doPython";
+import {elemXPathLite} from "@/utils/common"
 
 export default {
   name: "screen",
@@ -44,6 +45,7 @@ export default {
       canvasStyle: {
         opacity: 1,
         width: '100%',
+        // height: '100%'
       },
       lastScreenSize: {
         screen: {},
@@ -53,6 +55,7 @@ export default {
         }
       },
       nodeHovered: null,
+      nodeSelected: null,
       nodeSelectedId: null,
       ImageCounter: 0,
       python: Python,
@@ -112,14 +115,18 @@ export default {
     },
     "$store.state.loading": function () {
       this.loading = this.$store.getters.getLoading
-    }
+    },
+    "$store.state.nodeSelected": function () {
+      this.nodeSelected = this.$store.getters.getNodeSelected
+      this.drawRefresh()
+    },
+    "$store.state.resetHierarchy": function () {
+      this.reFlashHierarchy()
+    },
   },
   computed: {
     deviceUrl() {
       return this.$store.getters.getDeviceUrl
-    },
-    nodeSelected() {
-      return this.$store.getters.getNodeSelected
     },
   },
   methods: {
@@ -150,13 +157,10 @@ export default {
       const canvas = document.getElementById('bgCanvas')
       const ctx = canvas.getContext('2d');
       this.screenWebSocket = ws;
-
-
       ws.onopen = function () {
         console.log('screen websocket connected')
       };
       ws.onmessage = function (message) {
-        console.log("New message");
         let blob = new Blob([message.data], {
           type: 'image/jpeg'
         })
@@ -262,6 +266,15 @@ export default {
       }
     }
     ,
+    reFlashHierarchy() {
+      const windowSize = this.$store.getters.getWindowSize
+      const width = windowSize[0]
+      const height = windowSize[1]
+      // this.canvas.bg.width = width
+      // this.canvas.bg.height = height
+      this.canvas.fg.width = width
+      this.canvas.fg.height = height
+    },
     drawBlobImageToScreen(blob) {
       const that = this
       let url = null
@@ -275,8 +288,10 @@ export default {
       img.onload = function () {
         fgcanvas.width = bgcanvas.width = img.width
         fgcanvas.height = bgcanvas.height = img.height
+        that.resizeScreen(img)
+        console.log(bgcanvas)
+        console.log(fgcanvas)
         ctx.drawImage(img, 0, 0, img.width, img.height);
-        that.resizeScreen(img);
         // Try to forcefully clean everything to get rid of memory
         // leaks. Note that despite this effort, Chrome will still
         // leak huge amounts of memory when the developer tools are
@@ -462,8 +477,8 @@ export default {
         const pos = coord(event);
         const nodeHoveredList = that.findNodesByPosition(pos);
         const nodeHovered = nodeHoveredList[0];
-        if (nodeHovered) {
-          // TODO node 在这里处理下内容
+        if (nodeHovered && !that.$store.getters.getMouseHoverLock) {
+          that.nodeHovered = nodeHovered
           that.drawRefresh()
           that.$store.commit("setNodeSelectedId", nodeHovered._id)
           that.$store.commit("setNodeSelected", nodeHovered)
@@ -534,8 +549,12 @@ export default {
         const nodeHoveredList = that.findNodesByPosition(pos);
         const nodeHovered = nodeHoveredList[0];
         if (nodeHovered) {
+          that.nodeSelected = nodeHovered
+          that.drawRefresh()
           that.$store.commit("setNodeSelectedId", nodeHovered._id)
           that.$store.commit("setNodeSelected", nodeHovered)
+          that.$store.commit("setSelectedElementXpathLite", elemXPathLite(that.nodesList, that.originNodeMaps, nodeHovered))
+          that.$store.commit("setSelectedElementXpath", elemXPathLite(that.nodesList, that.originNodeMaps, nodeHovered, false))
         }
         element.removeEventListener('mouseleave', mouseHoverLeaveListener);
         element.removeEventListener('mousemove', mouseHoverListener);

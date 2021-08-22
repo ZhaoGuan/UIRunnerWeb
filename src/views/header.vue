@@ -35,14 +35,32 @@
         </el-button>
       </el-col>
       <el-col :span="2">
+        <el-popover
+            placement="top-start"
+            title="备注"
+            :width="200"
+            trigger="hover"
+            content='主要用于横屏兼容问题，用于强制刷新页面结构。问题原因是Android11的时候UIA2做横屏兼容与minicap冲突导致横向截图变回纵向'
+        >
+          <template #reference>
+            <el-button size="mini" style="width:100%"
+                       @click="setRestHierarchy">Reset Hierarchy
+            </el-button>
+          </template>
+        </el-popover>
+
+      </el-col>
+      <el-col :span="2">
         <el-switch v-model="liveScreen" active-text="实时" inactive-text="静态" @change="liveDevice">
         </el-switch>
       </el-col>
       <el-col :span="1">
         <el-button size="mini" v-if="platform==='iOS'&&liveScreen" class="btn btn-default" @click="iosLiveScreen">刷新
         </el-button>
+      </el-col>
+      <el-col :span="1">
         <el-button size="mini" type="danger" v-if="pythonReconnect===false" class="btn btn-default"
-                   @click="python.initPythonWebSocket()">
+                   @click="pythonReConnect">
           重连
         </el-button>
       </el-col>
@@ -74,6 +92,7 @@ export default {
   watch: {
     platform: function (event) {
       this.$store.commit("setPlatform", event)
+      this.python.platform = event
     },
     deviceId: function (event) {
       this.$store.commit("setDeviceId", event)
@@ -114,6 +133,10 @@ export default {
     }
   },
   methods: {
+    pythonReConnect() {
+      this.python.initPythonWebSocket()
+      setTimeout(() => this.python.runPython(this.python.generatePreloadCode()), 2000)
+    },
     doConnect() {
       this.$store.commit("setLoading", true)
       connect({
@@ -126,6 +149,7 @@ export default {
         this.$store.commit("setScreenUrl", ret.data.screenWebSocketUrl)
         this.python.platform = this.platform
         this.python.deviceId = deviceId
+        console.log(deviceId)
         this.python.callBackData = [
           {
             func: this.$store.dispatch,
@@ -149,6 +173,10 @@ export default {
       this.$store.dispatch("screenRefresh")
       this.$store.dispatch("hierarchyRefresh")
     },
+    setRestHierarchy() {
+      let count = this.$store.getters.getResetHierarchy
+      this.$store.commit("setRestHierarchy", count += 1)
+    },
     liveDevice() {
       switch (this.$store.getters.getPlatform) {
         case ("Android"): {
@@ -165,7 +193,7 @@ export default {
             this.doConnect()
             this.liveScreen = false
           } else {
-            this.$store.commit("setIosScreenUrl", this.$store.getters.getBaseIosScreenUrl + '?random=' + Math.random())
+            this.$store.commit("setIosScreenUrl", this.iosScreenUrl + '?random=' + Math.random())
             this.$store.commit("setLiveScreen", this.liveScreen)
           }
         }
@@ -173,7 +201,7 @@ export default {
 
     },
     iosLiveScreen() {
-      this.$store.commit("setIosScreenUrl", this.$store.getters.getBaseIosScreenUrl + '?random=' + Math.random())
+      this.$store.commit("setIosScreenUrl", this.iosScreenUrl + '?random=' + Math.random())
     }
   }
 }

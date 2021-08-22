@@ -1,8 +1,9 @@
 <template>
   <el-card shadow="hover">
+    <label>所选元素属性</label>
     <el-row class="panel-heading">
       <el-col :span="12">
-        <label>选择的元素</label>
+        <el-switch v-model="mouseHoverLock" active-text="锁定" inactive-text="解锁"></el-switch>
       </el-col>
       <el-col :span="12">
         <el-button size="mini" :disabled="loading" @click="clearCanvas()">
@@ -13,7 +14,7 @@
     <el-row class="panel-body">
       <div class="text-center">
         <el-button size="mini" v-show="platform==='Android'" @click="doUnlock()">Unlock</el-button>
-        <el-button size="mini" @click="doSendKeys('')">Send Keys</el-button>
+        <el-button size="mini" v-show="platform==='Android'" @click="doSendKeys('')">Send Keys</el-button>
         <el-button size="mini" v-show="platform==='Android'" @click="doKeyEventNu('66')">Enter</el-button>
         <el-button size="mini" :disabled="!nodeSelected" @click="doTap()">Tap
         </el-button>
@@ -25,6 +26,46 @@
         </el-button>
       </div>
     </el-row>
+    <el-row>
+      <el-col :offset="2" :span="5"><code>自定义路径</code></el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="1">
+        <el-popover
+            placement="top-start"
+            title="正则方法"
+            :width="200"
+            trigger="hover"
+            content='以内容为开头starts-with,包含内容contains.例如://节点名[starts-with(@元素名, "正则内容")]'
+        >
+          <template #reference>
+            <el-button type="danger" size="mini" circle></el-button>
+          </template>
+        </el-popover>
+      </el-col>
+      <el-col :offset="1" :span="22">
+        <el-input size="mini" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }"
+                  v-model="customizeLocation"></el-input>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="6">
+        <el-button size="mini" type="info" @click="toTestLocation">测试</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-button size="mini" type="success" @click="clickTestLocation">点击</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-button size="mini" type="primary" @click="saveTestLocation">保存</el-button>
+      </el-col>
+      <el-col :span="6">
+        <el-button size="mini" type="danger" @click="clearTestLocation">清空</el-button>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-checkbox v-model="useFullXpath">强制全路径</el-checkbox>
+    </el-row>
+    <el-row></el-row>
     <el-row border=“true”>
       <el-col :span="6">
         <el-checkbox v-model="showCursorPercent">点击坐标</el-checkbox>
@@ -53,6 +94,12 @@
         <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="elemXPathLite"></el-input>
       </el-col>
     </el-row>
+    <el-row v-if="useFullXpath">
+      <el-col :span="6"><code>FullXPath</code></el-col>
+      <el-col :span="18">
+        <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="fullElemXPath"></el-input>
+      </el-col>
+    </el-row>
     <el-row v-if="nodeSelected&&nodeSelected._type!==null">
       <el-col :span="6"><code>ClassName</code></el-col>
       <el-col :span="18">
@@ -69,7 +116,7 @@
     </template>
     <template v-if="nodeSelected&&nodeSelected.rect">
       <el-row>
-        <el-col :span="6">rect</el-col>
+        <el-col :span="6"><code>rect</code></el-col>
         <el-col :span="18">
           <span v-for="(value,key) in nodeSelected.rect" class="prop-value" :key="key">
               <code class="prop-value">{{ key }}:{{ value }} </code>
@@ -80,13 +127,14 @@
 </template>
 
 <script>
-import {nodesMap} from "@/utils/common";
+import {elemXPathLite, nodesMap} from "@/utils/common";
 import {Python} from "@/utils/doPython";
 
 export default {
   name: "nodeDetail",
   data() {
     return {
+      useFullXpath: false,
       elem: {
         rect: null
       },
@@ -99,10 +147,12 @@ export default {
       showCursorPercent: true,
       mapAttrCount: {},
       originNodeMaps: null,
+      customizeLocation: null,
       nodeSelected: null,
       platform: this.$store.getters.getPlatform,
       loading: this.$store.getters.getLoading,
-      activity: this.$store.getters.getActivity
+      activity: this.$store.getters.getActivity,
+      mouseHoverLock: false
     }
   },
   created() {
@@ -120,59 +170,18 @@ export default {
       if (cursor === null) {
         return {}
       }
-      if (this.showCursorPercent) {
+      this.$store.commit("setTapPoint", {x: cursor.px, y: cursor.py})
+      if (!this.showCursorPercent) {
         return {x: cursor.px, y: cursor.py}
       } else {
         return cursor
       }
     },
     elemXPathLite: function () {
-      this.emptyMapAttrCount()
-      this.nodes.forEach((n) => {
-        this.incrAttrCount("label", n.label)
-        this.incrAttrCount("resourceId", n.resourceId)
-        this.incrAttrCount("text", n.text)
-        this.incrAttrCount("_type", n._type)
-        this.incrAttrCount("description", n.description)
-      })
-      let node = this.nodeSelected;
-      let array = [];
-      while (node && node.parentId) {
-        const parent = this.originNodeMaps[node.parentId]
-        if (this.getAttrCount("label", node.label) === 1) {
-          array.push(`*[@label="${node.label}"]`)
-          break
-        } else if (this.getAttrCount("resourceId", node.resourceId) === 1) {
-          array.push(`*[@resource-id="${node.resourceId}"]`)
-          break
-        } else if (this.getAttrCount("text", node.text) === 1) {
-          array.push(`*[@text="${node.text}"]`)
-          break
-        } else if (this.getAttrCount("description", node.description) === 1) {
-          array.push(`*[@content-desc="${node.description}"]`)
-          break
-        } else if (this.getAttrCount("_type", node._type) === 1) {
-          array.push(`${node._type}`)
-          break
-        } else if (!parent) {
-          array.push(`${node._type}`)
-        } else {
-          let index = 0;
-          parent.children.some((n) => {
-            if (n._type === node._type) {
-              index++
-            }
-            return n._id === node._id
-          })
-          array.push(`${node._type}[${index}]`)
-        }
-        if (node.parent && node.parent._type) {
-          node = parent;
-        } else {
-          break
-        }
-      }
-      return `//${array.reverse().join("/")}`
+      return elemXPathLite(this.nodes, this.originNodeMaps, this.nodeSelected)
+    },
+    fullElemXPath: function () {
+      return elemXPathLite(this.nodes, this.originNodeMaps, this.nodeSelected, false)
     },
     deviceUrl: function () {
       if (this.platform === 'Android' && this.serial === '') {
@@ -190,6 +199,9 @@ export default {
     },
   },
   watch: {
+    mouseHoverLock() {
+      this.$store.commit("setMouseHoverLock", this.mouseHoverLock)
+    },
     "$store.state.loading": function () {
       this.loading = this.$store.getters.getLoading
     },
@@ -204,26 +216,26 @@ export default {
     },
     '$store.state.nodeSelected': function () {
       this.nodeSelected = this.$store.getters.getNodeSelected
-      this.python.nodeSelectedXpath = this.elemXPathLite
+      this.customizeLocation = this.elemXPathLite
+      if (this.useFullXpath) {
+        this.python.nodeSelectedXpath = this.fullElemXPath
+      } else {
+        this.python.nodeSelectedXpath = this.elemXPathLite
+      }
+    },
+    useFullXpath: function () {
+      this.$store.commit("setIsUseFullXpath", this.useFullXpath)
     }
   },
   methods: {
-    emptyMapAttrCount() {
-      this.mapAttrCount = {}
+    toTestLocation() {
+      this.python.findElement(this.customizeLocation)
     },
-    incrAttrCount(collectionKey, key) {
-      if (!Object.prototype.hasOwnProperty.call(this.mapAttrCount, collectionKey)) {
-        this.mapAttrCount[collectionKey] = {}
-      }
-      let count = this.mapAttrCount[collectionKey][key] || 0;
-      this.mapAttrCount[collectionKey][key] = count + 1;
+    saveTestLocation() {
+      this.$store.commit("setTestLocation", this.customizeLocation)
     },
-    getAttrCount(collectionKey, key) {
-      let mapCount = this.mapAttrCount[collectionKey];
-      if (!mapCount) {
-        return 0
-      }
-      return mapCount[key] || 0;
+    clearTestLocation() {
+      this.$store.commit("setTestLocation", null)
     },
     filterAttributeKeys(elem) {
       return Object.keys(elem).filter(k => {
@@ -254,6 +266,8 @@ export default {
       this.python.doClear()
     }, doPositionTap(x, y) {
       this.python.doPositionTap(x, y)
+    }, clickTestLocation() {
+      this.python.doClick(this.customizeLocation)
     }
   }
 }

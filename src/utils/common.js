@@ -29,28 +29,6 @@
 //   }
 // }
 
-/* Image Pool */
-export function ImagePool(size) {
-    const ImageSize = size
-    const images = []
-    const counter = 0
-    console.log(ImageSize, images, counter)
-
-}
-
-ImagePool.next = function () {
-    if (this.images.length < this.ImageSize) {
-        const image = new Image()
-        this.images.push(image)
-        return image
-    } else {
-        if (this.counter >= this.ImageSize) {
-            this.counter = 0
-        }
-    }
-
-    return this.images[this.counter++ % this.ImageSize]
-}
 
 export function b64toBlob(b64Data, contentType, sliceSize) {
     contentType = contentType || '';
@@ -100,4 +78,70 @@ export function nodesMap(source) {
     }
 
     return nodesMap
+}
+
+export function elemXPathLite(nodes, originNodeMaps, element, XPathLite = true) {
+    let mapAttrCount = {}
+
+    function incrAttrCount(collectionKey, key) {
+        if (!Object.prototype.hasOwnProperty.call(mapAttrCount, collectionKey)) {
+            mapAttrCount[collectionKey] = {}
+        }
+        let count = mapAttrCount[collectionKey][key] || 0;
+        mapAttrCount[collectionKey][key] = count + 1;
+    }
+
+    function getAttrCount(collectionKey, key) {
+        let mapCount = mapAttrCount[collectionKey];
+        if (!mapCount) {
+            return 0
+        }
+        return mapCount[key] || 0;
+    }
+
+    nodes.forEach((n) => {
+        incrAttrCount("label", n.label)
+        incrAttrCount("resourceId", n.resourceId)
+        incrAttrCount("text", n.text)
+        incrAttrCount("_type", n._type)
+        incrAttrCount("description", n.description)
+    })
+    let node = element;
+    let array = [];
+    while (node && node.parentId) {
+        const parent = originNodeMaps[node.parentId]
+        if (getAttrCount("label", node.label) === 1 && XPathLite) {
+            array.push(`*[@label="${node.label}"]`)
+            break
+        } else if (getAttrCount("resourceId", node.resourceId) === 1 && XPathLite) {
+            array.push(`*[@resource-id="${node.resourceId}"]`)
+            break
+        } else if (getAttrCount("text", node.text) === 1 && XPathLite) {
+            array.push(`*[@text="${node.text}"]`)
+            break
+        } else if (getAttrCount("description", node.description) === 1 && XPathLite) {
+            array.push(`*[@content-desc="${node.description}"]`)
+            break
+        } else if (getAttrCount("_type", node._type) === 1 && XPathLite) {
+            array.push(`${node._type}`)
+            break
+        } else if (!parent) {
+            array.push(`${node._type}`)
+        } else {
+            let index = 0;
+            parent.children.some((n) => {
+                if (n._type === node._type) {
+                    index++
+                }
+                return n._id === node._id
+            })
+            array.push(`${node._type}[${index}]`)
+        }
+        if (node.parent && node.parent._type) {
+            node = parent;
+        } else {
+            break
+        }
+    }
+    return `//${array.reverse().join("/")}`
 }

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-import {hierarchy, screenshot} from "@/api/ui";
+import {hierarchy, screenshot, functionList} from "@/api/ui";
 import {b64toBlob} from "@/utils/common"
 
 Vue.use(Vuex)
@@ -24,13 +24,24 @@ const store = new Vuex.Store({
         PythonWsOpen: null,
         hierarchy: null,
         jsonHierarchy: null,
+        resetHierarchy: 0,
         activity: null,
         packageName: null,
         windowSize: null,
         imgBlob: null,
         cursor: null,
         nodeSelected: null,
-        nodeSelectedId: null
+        nodeSelectedId: null,
+        isUseFullXpath: false,
+        selectedElementXpathLite: null,
+        selectedElementXpath: null,
+        funDocList: null,
+        tapPoint: null,
+        actionList: [],
+        mouseHoverLock: false,
+        alertClose: [],
+        customizeLocation: null,
+        saveAlertClose: localStorage.saveAlertClose || ""
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -43,6 +54,7 @@ const store = new Vuex.Store({
         getLoading: state => state.loading,
         getLiveScreen: state => state.liveScreen,
         getJsonHierarchy: state => state.jsonHierarchy,
+        getResetHierarchy: state => state.resetHierarchy,
         getImgBlob: state => state.imgBlob,
         getActivity: state => state.activity,
         getXpath: state => state.xpath,
@@ -51,24 +63,39 @@ const store = new Vuex.Store({
         getCursor: state => state.cursor,
         getNodeSelected: state => state.nodeSelected,
         getNodeSelectedId: state => state.nodeSelectedId,
+        getIsUseFullXpath: state => state.isUseFullXpath,
+        getSelectedElementXpathLite: state => state.selectedElementXpathLite,
+        getSelectedElementXpath: state => state.selectedElementXpath,
+        getSelectedElement: state => {
+            if (state.isUseFullXpath) {
+                return state.selectedElementXpath
+            } else {
+                return state.selectedElementXpathLite
+            }
+        },
         getWindowSize: state => state.windowSize,
-
+        getFuncDocList: state => state.funDocList,
+        getTapPoint: state => state.tapPoint,
+        getActionList: state => state.actionList,
+        getMouseHoverLock: state => state.mouseHoverLock,
+        getAlertClose: state => state.alertClose,
+        getSaveAlertClose: state => state.saveAlertClose,
+        getCustomizeLocation: state => state.customizeLocation
     },
     mutations: {
         setDeviceUrl(state, data) {
             state.deviceUrl = data
         },
         setPlatform(state, data) {
-            localStorage.setItem("platform", data)
+            console.log(data)
             state.platform = data
-
         },
         setDeviceId(state, data) {
             state.deviceId = data
         },
         setSerial(state, data) {
             localStorage.setItem("serial", data)
-            // state.serial = data
+            state.serial = data
         },
         setScreenUrl(state, data) {
             localStorage.setItem("ScreenUrl", data)
@@ -79,7 +106,7 @@ const store = new Vuex.Store({
         },
         setBaseIosScreenUrl(state, data) {
             localStorage.setItem("BaseIosScreenUrl", data)
-            // state.iosScreenUrl = data
+            state.BaseIosScreenUrl = data
         },
         setLoading(state, data) {
             state.loading = data
@@ -89,6 +116,9 @@ const store = new Vuex.Store({
         },
         setJsonHierarchy(state, data) {
             state.jsonHierarchy = data
+        },
+        setRestHierarchy(state, data) {
+            state.resetHierarchy = data
         },
         setActivity(state, data) {
             state.activity = data
@@ -114,8 +144,38 @@ const store = new Vuex.Store({
         setNodeSelectedId(state, data) {
             state.nodeSelectedId = data
         },
+        setIsUseFullXpath(state, data) {
+            state.isUseFullXpath = data
+        },
+        setSelectedElementXpathLite(state, data) {
+            state.selectedElementXpathLite = data
+        },
+        setSelectedElementXpath(state, data) {
+            state.selectedElementXpath = data
+        },
         setWindowSize(state, data) {
             state.windowSize = data
+        },
+        setFuncDocList(state, data) {
+            state.funDocList = data
+        },
+        setTapPoint(state, data) {
+            state.tapPoint = data
+        },
+        setActionList(state, data) {
+            state.actionList = data
+        },
+        setMouseHoverLock(state, data) {
+            state.mouseHoverLock = data
+        },
+        setAlertClose(state, data) {
+            state.alertClose = data
+        },
+        setSaveAlertClose(state, data) {
+            localStorage.setItem("saveAlertClose", data)
+        },
+        setCustomizeLocation(state, data) {
+            state.customizeLocation = data
         }
     },
     modules: {},
@@ -123,44 +183,10 @@ const store = new Vuex.Store({
         setIsLoading({commit}) {
             commit("setLoading", true)
         },
-        initPythonWebSocket({commit}) {
-            // 初始化变量
-            const proEnv = require('@/config/pro.env'); // 生产环境
-            const devEnv = require('@/config/dev.env'); // 本地环境
-            let baseUrl = null
-            let host = null
-            switch (process.env.NODE_ENV) {
-                case 'development':
-                    baseUrl = devEnv.baseurl;
-                    break;
-                case 'production':
-                    baseUrl = proEnv.baseurl; //打包完路径
-                    break;
-            }
-            if (baseUrl && baseUrl.includes("http://")) {
-                host = baseUrl.replace("http://", "")
-            }
-            if (baseUrl && baseUrl.includes("https://")) {
-                host = baseUrl.replace("https://", "")
-            }
-            const ws = this.pyshell.ws = new WebSocket("ws://" + host + "/ui/ws/python")
-            ws.onopen = () => {
-                this.pyshell.wsOpen = true
-                commit("setPythonWsOpen", true)
-                console.log("websocket opened")
-            }
-            ws.onmessage = (message) => {
-                const data = JSON.parse(message.data)
-                console.log(data)
-            }
-            ws.onclose = () => {
-                this.pyshell.wsOpen = false
-                commit("setPythonWsOpen", false)
-            }
-        },
         screenRefresh({commit}) {
             if (!this.getters.getLiveScreen) {
                 commit("setLoading", true)
+                console.log("Do Screen")
                 screenshot(this.getters.getDeviceId)
                     .then(function (ret) {
                         commit("setImgBlob", b64toBlob(ret.data.data, 'image/' + ret.data.type))
@@ -189,6 +215,13 @@ const store = new Vuex.Store({
             this.screenRefresh(commit)
             this.hierarchyRefresh(commit)
             commit("setLoading", false)
+        },
+        getFuncDocList({commit}) {
+            functionList("mobil").then(response => {
+                if (response.code === 20000) {
+                    commit("setFuncDocList", response.data)
+                }
+            })
         }
     }
 })
