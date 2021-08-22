@@ -40,7 +40,7 @@
             title="备注"
             :width="200"
             trigger="hover"
-            content='主要用于横屏兼容问题，用于强制刷新页面结构。现在发现截屏问题Redmi截图直接是一半黑屏.....'
+            content='主要用于横屏兼容问题，用于强制刷新页面结构。问题原因是Android11的时候UIA2做横屏兼容与minicap冲突导致横向截图变回纵向'
         >
           <template #reference>
             <el-button size="mini" style="width:100%"
