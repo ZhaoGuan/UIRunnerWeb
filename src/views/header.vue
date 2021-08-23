@@ -30,9 +30,19 @@
         </el-button>
       </el-col>
       <el-col :span="2">
-        <el-button size="mini" :disabled="loading || connecting" style="width:100%"
-                   @click="dumpHierarchyWithScreen">Dump Hierarchy
-        </el-button>
+        <el-popover
+            placement="top-start"
+            title="备注"
+            :width="200"
+            trigger="hover"
+            content='页面结构有不准确的时候请做以下事情：1.请关闭虚拟按钮 2.横屏的时候旋转手机的留海至右侧'
+        >
+          <template #reference>
+            <el-button size="mini" :disabled="loading || connecting" style="width:100%"
+                       @click="dumpHierarchyWithScreen">获取页面结构
+            </el-button>
+          </template>
+        </el-popover>
       </el-col>
       <el-col :span="2">
         <el-popover
@@ -40,19 +50,28 @@
             title="备注"
             :width="200"
             trigger="hover"
-            content='主要用于横屏兼容问题，用于强制刷新页面结构。问题原因是Android11的时候UIA2做横屏兼容与minicap冲突导致横向截图变回纵向'
+            content='主要用于横屏兼容问题，用于强制刷新页面结构。问题原因是Android11的时候UIA2做横屏兼容与MiniCap冲突导致横向截图变回纵向'
         >
           <template #reference>
             <el-button size="mini" style="width:100%"
-                       @click="setRestHierarchy">Reset Hierarchy
+                       @click="setRestHierarchy">重置页面结构
             </el-button>
           </template>
         </el-popover>
-
       </el-col>
       <el-col :span="2">
-        <el-switch v-model="liveScreen" active-text="实时" inactive-text="静态" @change="liveDevice">
-        </el-switch>
+        <el-popover
+            placement="top-start"
+            title="备注"
+            :width="200"
+            trigger="hover"
+            content='由于现在UIA2兼容问题现在只能通过切换实时和静态来保证抓到的页面显示正确'
+        >
+          <template #reference>
+            <el-switch v-model="liveScreen" active-text="实时" inactive-text="静态" @change="liveDevice">
+            </el-switch>
+          </template>
+        </el-popover>
       </el-col>
       <el-col :span="1">
         <el-button size="mini" v-if="platform==='iOS'&&liveScreen" class="btn btn-default" @click="iosLiveScreen">刷新
