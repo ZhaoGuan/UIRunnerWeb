@@ -46,6 +46,7 @@
       </el-col>
       <el-col :span="2">
         <el-popover
+            v-show="platform==='Android'"
             placement="top-start"
             title="备注"
             :width="200"

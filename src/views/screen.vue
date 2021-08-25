@@ -264,14 +264,13 @@ export default {
           height: Math.floor(screenDiv.clientHeight) + 'px', //'100%',
         })
       }
-    }
-    ,
+    },
     reFlashHierarchy() {
       const windowSize = this.$store.getters.getWindowSize
       const width = windowSize[0]
       const height = windowSize[1]
-      // this.canvas.bg.width = width
-      // this.canvas.bg.height = height
+      this.canvas.bg.width = width
+      this.canvas.bg.height = height
       this.canvas.fg.width = width
       this.canvas.fg.height = height
     },
