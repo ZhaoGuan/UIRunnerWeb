@@ -232,10 +232,10 @@ export default {
       this.python.findElement(this.customizeLocation)
     },
     saveTestLocation() {
-      this.$store.commit("setTestLocation", this.customizeLocation)
+      this.$store.commit("setCustomizeLocation", this.customizeLocation)
     },
     clearTestLocation() {
-      this.$store.commit("setTestLocation", null)
+      this.$store.commit("setCustomizeLocation", null)
     },
     filterAttributeKeys(elem) {
       return Object.keys(elem).filter(k => {

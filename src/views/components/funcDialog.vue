@@ -129,7 +129,6 @@ export default {
           this.funcParams.location = this.$store.getters.getSelectedElement
         }
       }
-      console.log(this.funcParams)
       const actionList = this.$store.getters.getActionList
       actionList.push({
         'NAME': this.actionName,
