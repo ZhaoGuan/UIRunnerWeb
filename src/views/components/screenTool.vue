@@ -10,7 +10,7 @@
       </el-row>
       <el-row v-if="afterImg">
         <el-form :model="actionData" ref="actionForm" label-width="100px" :rules="rules">
-          <el-form-item label="动作名称" prop="name" >
+          <el-form-item label="动作名称" prop="name">
             <el-input size="mini" v-model="actionData.name"></el-input>
           </el-form-item>
         </el-form>
@@ -120,6 +120,10 @@ export default {
       this.screenToolDialog = false
       this.ImgShow = false
       this.afterImg = null
+      this.screenImg = null
+      this.actionData = {
+        name: null
+      }
     },
     addPicTap() {
       this.$refs.actionForm.validate((valid) => {
