@@ -19,7 +19,17 @@
           <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.appActivity"></el-input>
         </el-form-item>
         <el-form-item :size="formItemSize" v-if="platform==='ANDROID'" label="方向">
-          <el-input :size="formItemSize" v-model="template.ORIENTATION"></el-input>
+          <el-popover
+              placement="top-start"
+              title="允许值:"
+              :width="200"
+              trigger="hover"
+              content='90 180 270'
+          >
+            <template #reference>
+              <el-input :size="formItemSize" v-model="template.ORIENTATION"></el-input>
+            </template>
+          </el-popover>
         </el-form-item>
         <el-form-item>
           <el-button :disabled="show" v-if="platform==='ANDROID'" type="success" :size="formItemSize"
@@ -27,7 +37,8 @@
           </el-button>
           <el-button :disabled="show" type="success" :size="formItemSize" @click="startApp">启动应用</el-button>
           <el-button type="success" :size="formItemSize" @click="clearTemplate">清空设置</el-button>
-          <el-button v-if="platform==='ANDROID'" type="success" :size="formItemSize" @click="androidSetOrientation">旋转屏幕
+          <el-button type="success" :size="formItemSize" @click="androidSetOrientation">
+            旋转屏幕
           </el-button>
         </el-form-item>
       </el-form>
@@ -37,7 +48,7 @@
         <el-input size="mini" v-model="alertCloseName"></el-input>
       </el-col>
       <el-col :span="10">
-        <el-col :span="12">
+        <el-col :span="8">
           <el-select size="mini" v-model="alertCloseAction">
             <el-option
                 v-for="item in alertCloseActionOptions"
@@ -47,7 +58,7 @@
             </el-option>
           </el-select>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="16">
           <el-button type="success" size="mini" @click="addAlertClose">添加Alert关闭元素</el-button>
         </el-col>
       </el-col>
@@ -77,10 +88,10 @@
     </el-collapse-item>
     <el-collapse-item title="动作列表">
       <funcDialog ref="funcDialog"/>
-      <el-col :span="6">
+      <el-col :span="4">
         <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="4">
         <el-popover
             placement="top-start"
             title="规则"
@@ -93,12 +104,16 @@
           </template>
         </el-popover>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="4">
         <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>
       </el-col>
-      <el-col :span="6">
-        <el-button type="success" size="mini" @click="clearActionList">清空动作</el-button>
+      <el-col :span="4">
+        <el-button type="success" size="mini" @click="$refs.ScreenTool.openDialog()">图像识别</el-button>
       </el-col>
+      <el-col :span="4">
+        <el-button type="danger" size="mini" @click="clearActionList">清空动作</el-button>
+      </el-col>
+      <ScreenTool ref="ScreenTool"/>
       <el-table
           :data="actionList"
           stripe
@@ -167,10 +182,11 @@ import {Python} from "@/utils/doPython";
 import funcDialog from "./components/funcDialog"
 import {message} from "@/utils/tools";
 import {caseTest, taskResult} from "@/api/ui";
+import ScreenTool from "@/views/components/screenTool"
 
 export default {
   name: "UICase",
-  components: {funcDialog},
+  components: {funcDialog, ScreenTool},
   data() {
     return {
       platform: this.$store.getters.getPlatform.toUpperCase(),
@@ -186,8 +202,8 @@ export default {
         'DESIRED_CAPS':
             {
               'URL': '',
-              'appPackage': 'com.pplingo.connect',
-              'appActivity': 'com.pplingo.connect.MainActivity',
+              'appPackage': 'com.pplingo.chinese',
+              'appActivity': 'com.example.connectapp.MainActivity',
               'deviceName': null,
               'passWord': 888888,
               'performance': false,
@@ -429,6 +445,7 @@ export default {
       caseTest(caseResult).then(response => {
         if (response.code === 20000 && response.data !== null) {
           this.debugTaskId = response.data.taskId
+          message("执行成功！", "等待运行")
         }
       })
     },

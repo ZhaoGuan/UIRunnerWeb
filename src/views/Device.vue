@@ -21,9 +21,6 @@
         </el-tabs>
       </el-col>
     </el-row>
-    <el-row>
-      <ScreenTool></ScreenTool>
-    </el-row>
   </div>
 </template>
 
@@ -33,12 +30,11 @@ import hierarchyTree from "@/views/hierarchyTree";
 import nodeDetail from "@/views/nodeDetail"
 import DeviceHeader from "@/views/header"
 import UICase from "@/views/UICase"
-import ScreenTool from "@/views/components/screenTool"
 
 export default {
   name: "Device",
   components: {
-    hierarchyTree, Screen, nodeDetail, DeviceHeader, UICase, ScreenTool
+    hierarchyTree, Screen, nodeDetail, DeviceHeader, UICase
   },
   mounted() {
     this.$store.dispatch("getFuncDocList")
