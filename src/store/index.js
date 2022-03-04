@@ -41,7 +41,8 @@ const store = new Vuex.Store({
         mouseHoverLock: false,
         alertClose: [],
         customizeLocation: null,
-        saveAlertClose: localStorage.saveAlertClose || ""
+        saveAlertClose: localStorage.saveAlertClose || "",
+        saveScreen: null
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -80,7 +81,8 @@ const store = new Vuex.Store({
         getMouseHoverLock: state => state.mouseHoverLock,
         getAlertClose: state => state.alertClose,
         getSaveAlertClose: state => state.saveAlertClose,
-        getCustomizeLocation: state => state.customizeLocation
+        getCustomizeLocation: state => state.customizeLocation,
+        getSaveScreen: state => state.saveScreen
     },
     mutations: {
         setDeviceUrl(state, data) {
@@ -174,8 +176,8 @@ const store = new Vuex.Store({
         setSaveAlertClose(state, data) {
             localStorage.setItem("saveAlertClose", data)
         },
-        setCustomizeLocation(state, data) {
-            state.customizeLocation = data
+        setSaveScreen(state, data) {
+            state.saveScreen = data
         }
     },
     modules: {},
@@ -186,7 +188,6 @@ const store = new Vuex.Store({
         screenRefresh({commit}) {
             if (!this.getters.getLiveScreen) {
                 commit("setLoading", true)
-                console.log("Do Screen")
                 screenshot(this.getters.getDeviceId)
                     .then(function (ret) {
                         commit("setImgBlob", b64toBlob(ret.data.data, 'image/' + ret.data.type))
@@ -199,7 +200,6 @@ const store = new Vuex.Store({
                 commit("setLoading", true)
             }
             hierarchy(this.getters.getDeviceId).then(response => {
-                console.log("Do Hierarchy")
                 commit("setJsonHierarchy", JSON.parse(JSON.stringify(response.data.jsonHierarchy)))
                 commit("setActivity", response.data.packageName + "/" + response.data.activity)
                 // state.packageName = response.data.packageName

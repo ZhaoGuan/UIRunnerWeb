@@ -18,12 +18,17 @@
                       prop="DESIRED_CAPS.appActivity">
           <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.appActivity"></el-input>
         </el-form-item>
+        <el-form-item :size="formItemSize" v-if="platform==='ANDROID'" label="方向">
+          <el-input :size="formItemSize" v-model="template.ORIENTATION"></el-input>
+        </el-form-item>
         <el-form-item>
           <el-button :disabled="show" v-if="platform==='ANDROID'" type="success" :size="formItemSize"
                      @click="unlockDevice">解锁设备
           </el-button>
           <el-button :disabled="show" type="success" :size="formItemSize" @click="startApp">启动应用</el-button>
           <el-button type="success" :size="formItemSize" @click="clearTemplate">清空设置</el-button>
+          <el-button v-if="platform==='ANDROID'" type="success" :size="formItemSize" @click="androidSetOrientation">旋转屏幕
+          </el-button>
         </el-form-item>
       </el-form>
     </el-collapse-item>
@@ -189,6 +194,7 @@ export default {
               'perfHost': "ip",
             },
         'ALERT_CLOSE_ELEMENTS': [],
+        'ORIENTATION': null,
         'ACTIONS': []
       },
       rules: {
@@ -244,6 +250,11 @@ export default {
   methods: {
     unlockDevice() {
       this.python.androidUnlock(this.template.DESIRED_CAPS.passWord)
+    },
+    androidSetOrientation() {
+      if (this.template.ORIENTATION) {
+        this.python.androidSetOrientation(this.template.ORIENTATION)
+      }
     },
     startApp() {
       const appPackage = this.template.DESIRED_CAPS.appPackage

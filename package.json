@@ -14,6 +14,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "cropperjs": "^1.5.12",
     "element-ui": "^2.4.5",
     "flatted": "^2.0.2",
     "js-yaml": "^3.14.1",

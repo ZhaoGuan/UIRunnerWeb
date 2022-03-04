@@ -288,8 +288,6 @@ export default {
         fgcanvas.width = bgcanvas.width = img.width
         fgcanvas.height = bgcanvas.height = img.height
         that.resizeScreen(img)
-        console.log(bgcanvas)
-        console.log(fgcanvas)
         ctx.drawImage(img, 0, 0, img.width, img.height);
         // Try to forcefully clean everything to get rid of memory
         // leaks. Note that despite this effort, Chrome will still

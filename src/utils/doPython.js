@@ -71,7 +71,7 @@ Python.initPythonWebSocket = function () {
             this.callBack()
         }
         if (data.status === "FAIL") {
-            alertMessage("操作执行错误", "错误内容" + data.message)
+            alertMessage("操作执行错误", "错误内容: " + data.message)
         }
     }
     ws.onclose = () => {
@@ -242,5 +242,13 @@ Python.findElement = function (location) {
 }
 Python.doClick = function (location) {
     const code = `action.click_element('${location}')`
+    this.runPython(code)
+}
+Python.doImgCheck = function (search_b64_img) {
+    const code = `action.image_match('${search_b64_img}')`
+    this.runPython(code)
+}
+Python.androidSetOrientation = function (value) {
+    const code = `action.android_set_orientation(${value})`
     this.runPython(code)
 }
