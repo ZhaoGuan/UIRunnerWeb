@@ -137,7 +137,7 @@
             <el-button size="mini" icon="el-icon-arrow-down"
                        @click="actionDown(scope.row)">
             </el-button>
-            <el-button size="mini" type="info">测试</el-button>
+            <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
             <!--            <el-button size="mini" type="success"-->
             <!--                       @click="editAction(scope.row)">EDIT-->
             <!--            </el-button>-->
@@ -302,7 +302,6 @@ export default {
     },
     addElementClick() {
       let element = this.$store.getters.getCustomizeLocation
-      console.log(element)
       if (this.$store.getters.getCustomizeLocation === null) {
         element = this.$store.getters.getSelectedElement
       }
@@ -333,6 +332,10 @@ export default {
     clearActionList() {
       this.$store.commit("setActionList", [])
       this.debugTaskResult = null
+    },
+    funcTest(data) {
+      console.log(data)
+      this.python.doFuncTest(data)
     },
     editAction(data) {
       this.$refs.funcDialog.updateDialog(data)

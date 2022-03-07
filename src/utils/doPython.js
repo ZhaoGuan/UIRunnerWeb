@@ -115,7 +115,7 @@ Python.generatePreloadCode = function () {
 Python.runPython = function (code) {
     if (!this.pyshell.running) {
         console.log(code)
-        message("已执行","请等待结果!")
+        message("已执行", "请等待结果!")
         return new Promise((resolve) => {
             this.pyshell.running = true
             this.pyshell.ws.send(JSON.stringify({method: "input", value: code}))
@@ -251,5 +251,14 @@ Python.doImgCheck = function (search_b64_img) {
 }
 Python.androidSetOrientation = function (value) {
     const code = `action.android_set_orientation(${value})`
+    this.runPython(code)
+}
+Python.doFuncTest = function (value) {
+    const func = value.TYPE
+    let params = ''
+    for (const key in value.DATA) {
+        params += `${key}='${value.DATA[key]}'`
+    }
+    const code = `action.${func}(${params})`
     this.runPython(code)
 }

@@ -110,8 +110,6 @@ export default {
       this.cropper.get
       const Canvas = this.cropper.getCroppedCanvas()
       this.afterImg = Canvas.toDataURL('image/png')
-      console.log(this.afterImg)
-      console.log(this.point)
     },
     checkCrop() {
       this.python.doImgCheck(this.afterImg)
