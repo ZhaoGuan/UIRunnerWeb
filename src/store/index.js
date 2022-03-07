@@ -176,6 +176,9 @@ const store = new Vuex.Store({
         setSaveAlertClose(state, data) {
             localStorage.setItem("saveAlertClose", data)
         },
+        setCustomizeLocation(state, data) {
+            state.customizeLocation = data
+        },
         setSaveScreen(state, data) {
             state.saveScreen = data
         }

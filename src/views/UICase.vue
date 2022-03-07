@@ -108,7 +108,10 @@
         <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>
       </el-col>
       <el-col :span="4">
-        <el-button type="success" size="mini" @click="$refs.ScreenTool.openDialog()">图像识别</el-button>
+        <el-button type="success" size="mini">页面滑动</el-button>
+      </el-col>
+      <el-col :span="4">
+        <el-button :disabled="show" type="success" size="mini" @click="$refs.ScreenTool.openDialog()">图像识别</el-button>
       </el-col>
       <el-col :span="4">
         <el-button type="danger" size="mini" @click="clearActionList">清空动作</el-button>
@@ -134,13 +137,11 @@
             <el-button size="mini" icon="el-icon-arrow-down"
                        @click="actionDown(scope.row)">
             </el-button>
+            <el-button size="mini" type="info">测试</el-button>
             <!--            <el-button size="mini" type="success"-->
             <!--                       @click="editAction(scope.row)">EDIT-->
             <!--            </el-button>-->
-            <el-button size="mini" type="danger"
-                       @click="deleteAction(scope.row)">DELETE
-            </el-button>
-
+            <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -301,6 +302,7 @@ export default {
     },
     addElementClick() {
       let element = this.$store.getters.getCustomizeLocation
+      console.log(element)
       if (this.$store.getters.getCustomizeLocation === null) {
         element = this.$store.getters.getSelectedElement
       }

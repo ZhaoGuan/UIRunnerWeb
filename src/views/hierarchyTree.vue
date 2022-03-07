@@ -8,7 +8,8 @@
              :props="defaultProps"
              :default-expanded-keys="expandedKeys"
              @node-click="handleNodeClick"
-             node-key="_id">
+             node-key="_id"
+    style="overflow: auto">
     </el-tree>
   </el-card>
 </template>

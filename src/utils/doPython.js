@@ -115,6 +115,7 @@ Python.generatePreloadCode = function () {
 Python.runPython = function (code) {
     if (!this.pyshell.running) {
         console.log(code)
+        message("已执行","请等待结果!")
         return new Promise((resolve) => {
             this.pyshell.running = true
             this.pyshell.ws.send(JSON.stringify({method: "input", value: code}))

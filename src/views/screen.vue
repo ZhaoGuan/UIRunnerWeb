@@ -12,10 +12,10 @@
              v-bind:style="canvasStyle">
       </el-row>
       <el-row class="button-footer">
-        <el-button @click="doKeyEvent('power')">POWER</el-button>
-        <el-button @click="doKeyEvent('home')">HOME</el-button>
-        <el-button @click="doKeyEvent('back')" v-show="platform === 'Android'">BACK</el-button>
-        <el-button @click="iOSBack" v-show="platform === 'iOS'">BACK</el-button>
+        <el-button size="mini" @click="doKeyEvent('power')">POWER</el-button>
+        <el-button size="mini" @click="doKeyEvent('home')">HOME</el-button>
+        <el-button size="mini" @click="doKeyEvent('back')" v-show="platform === 'Android'">BACK</el-button>
+        <el-button size="mini" @click="iOSBack" v-show="platform === 'iOS'">BACK</el-button>
       </el-row>
     </section>
   </el-card>
@@ -611,13 +611,13 @@ export default {
   justify-content: center;
   background-color: gray;
   position: relative;
-  height: 85vh;
+  height: 80vh;
   width: 100%;
 }
 
 .screen {
   /*居中方法*/
-  height: 90vh;
+  height: 85vh;
   width: 100%;
   position: relative;
 }

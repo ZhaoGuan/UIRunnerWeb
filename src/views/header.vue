@@ -26,7 +26,7 @@
       </el-col>
       <el-col :span="2">
         <el-button size="mini" @click="doConnect" style="width:100%" :disabled="connecting">
-          Connect
+         连接设备
         </el-button>
       </el-col>
       <el-col :span="2">
