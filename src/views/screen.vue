@@ -511,6 +511,20 @@ export default {
             ((Math.abs(that.swipeEnd.x - that.swipeBegin.x) > 50) ||
                 (Math.abs(that.swipeEnd.y - that.swipeBegin.y) > 50))) {
           that.python.doSwipe(that.swipeBegin, that.swipeEnd)
+          const begin_x = that.swipeBegin.x / that.canvas.fg.offsetWidth
+          const begin_y = that.swipeBegin.y / that.canvas.fg.offsetHeight
+          const end_x = that.swipeEnd.x / that.canvas.fg.offsetWidth
+          const end_y = that.swipeEnd.y / that.canvas.fg.offsetHeight
+          that.$store.commit("setSwipePoint", {
+            begin: {
+              x: begin_x.toFixed(2),
+              y: begin_y.toFixed(2)
+            },
+            end: {
+              x: end_x.toFixed(2),
+              y: end_y.toFixed(2)
+            }
+          })
           that.swipeBegin = null
           that.swipeEnd = null
         } else {

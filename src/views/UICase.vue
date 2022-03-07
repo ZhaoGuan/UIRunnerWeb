@@ -108,7 +108,8 @@
         <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>
       </el-col>
       <el-col :span="4">
-        <el-button type="success" size="mini">页面滑动</el-button>
+        <el-button type="success" :disabled="$store.getters.getSwipePoint===null" size="mini" @click="addSwipe">获取页面滑动
+        </el-button>
       </el-col>
       <el-col :span="4">
         <el-button :disabled="show" type="success" size="mini" @click="$refs.ScreenTool.openDialog()">图像识别</el-button>
@@ -117,6 +118,7 @@
         <el-button type="danger" size="mini" @click="clearActionList">清空动作</el-button>
       </el-col>
       <ScreenTool ref="ScreenTool"/>
+      <swipeDialog ref="swipeDialog"/>
       <el-table
           :data="actionList"
           stripe
@@ -187,7 +189,7 @@ import ScreenTool from "@/views/components/screenTool"
 
 export default {
   name: "UICase",
-  components: {funcDialog, ScreenTool},
+  components: {funcDialog, ScreenTool,},
   data() {
     return {
       platform: this.$store.getters.getPlatform.toUpperCase(),
@@ -334,7 +336,6 @@ export default {
       this.debugTaskResult = null
     },
     funcTest(data) {
-      console.log(data)
       this.python.doFuncTest(data)
     },
     editAction(data) {
@@ -363,6 +364,22 @@ export default {
         this.actionList.unshift(this.actionList.splice(index, 1)[0]);
       }
       this.$store.commit("setActionList", this.actionList)
+    },
+    addSwipe() {
+      const point = this.$store.getters.getSwipePoint
+      const actionList = this.$store.getters.getActionList
+      actionList.push({
+        'NAME': `滑动坐标(${point.begin.x},${point.begin.y})(${point.end.x},${point.end.y})`,
+        'TYPE': "swipe",
+        'DATA': {
+          "begin_x": point.begin.x,
+          "begin_y": point.begin.y,
+          "end_x": point.end.x,
+          "end_y": point.end.y,
+        }
+      })
+      this.$store.commit("setActionList", actionList)
+      this.$store.commit("setSwipePoint", null)
     },
     clearTemplate() {
       this.template = {

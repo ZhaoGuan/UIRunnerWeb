@@ -42,7 +42,8 @@ const store = new Vuex.Store({
         alertClose: [],
         customizeLocation: null,
         saveAlertClose: localStorage.saveAlertClose || "",
-        saveScreen: null
+        saveScreen: null,
+        swipePoint: null
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -82,7 +83,8 @@ const store = new Vuex.Store({
         getAlertClose: state => state.alertClose,
         getSaveAlertClose: state => state.saveAlertClose,
         getCustomizeLocation: state => state.customizeLocation,
-        getSaveScreen: state => state.saveScreen
+        getSaveScreen: state => state.saveScreen,
+        getSwipePoint: state => state.swipePoint
     },
     mutations: {
         setDeviceUrl(state, data) {
@@ -181,6 +183,9 @@ const store = new Vuex.Store({
         },
         setSaveScreen(state, data) {
             state.saveScreen = data
+        },
+        setSwipePoint(state, data) {
+            state.swipePoint = data
         }
     },
     modules: {},

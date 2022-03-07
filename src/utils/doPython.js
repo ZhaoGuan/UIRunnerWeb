@@ -257,7 +257,7 @@ Python.doFuncTest = function (value) {
     const func = value.TYPE
     let params = ''
     for (const key in value.DATA) {
-        params += `${key}='${value.DATA[key]}'`
+        params += `${key}='${value.DATA[key]}',`
     }
     const code = `action.${func}(${params})`
     this.runPython(code)
