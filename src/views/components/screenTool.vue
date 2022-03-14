@@ -58,17 +58,16 @@ export default {
   mounted() {
   },
   watch: {
-    // "$store.state.imgBlob": function () {
-    //   if (!this.afterImg) {
-    //     this.reFlashScreen()
-    //   }
-    // },
+    "$store.state.imgBlob": function () {
+      if (!this.afterImg && this.screenToolDialog) {
+        this.reFlashScreen()
+      }
+    },
   },
   methods: {
     openDialog() {
-        this.$store.dispatch("screenRefresh")
-        this.screenToolDialog = true
-        this.reFlashScreen()
+      this.$store.dispatch("screenRefresh")
+      this.screenToolDialog = true
     },
     blobToBase64(blob) {
       this.ImgShow = false

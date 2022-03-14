@@ -49,3 +49,10 @@ export function taskResult(taskId) {
         params: {taskId}
     })
 }
+
+export function getLocalDevices() {
+    return request({
+        url: '/devices/all',
+        method: 'get',
+    })
+}

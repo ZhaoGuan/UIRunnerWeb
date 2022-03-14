@@ -1,7 +1,17 @@
 <template>
   <el-card>
     <el-row>
-      <el-col :span="2">
+      <el-col :span="3">
+        <el-select size="mini" v-model="deviceFrom" placeholder="请选择设备源">
+          <el-option
+              v-for="item in deviceFromOptions"
+              :key="item.value"
+              :label="`设备来源${item.label}`"
+              :value="item.value">
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col v-if="deviceFrom==='free'" :span="2">
         <el-select size="mini" v-model="platform">
           <el-option
               v-for="item in options"
@@ -11,7 +21,7 @@
           </el-option>
         </el-select>
       </el-col>
-      <el-col :span="8">
+      <el-col v-if="deviceFrom==='free'" :span="8">
         <div v-show="platform==='Android'">
           <el-input size="mini" v-model="serial"/>
         </div>
@@ -24,9 +34,23 @@
           </el-col>
         </div>
       </el-col>
+      <el-col v-if="deviceFrom==='local'" :span="9">
+        <el-select size="mini" v-model="localDeviceId" style="width: 100%">
+          <el-option
+              v-for="item in deviceList"
+              :key="item.udid"
+              :label="`${item.device_type}-${item.udid}`"
+              :value="item.udid">
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col v-if="deviceFrom==='local'" :span="1">
+        <el-button icon="el-icon-refresh-left" size="mini" type="success" @click="toGetLocalDevices"/>
+      </el-col>
       <el-col :span="2">
-        <el-button size="mini" @click="doConnect" style="width:100%" :disabled="connecting">
-         连接设备
+        <el-button size="mini" @click="doConnect" style="width:100%"
+                   :disabled="(serial===null&&deviceFrom==='local')||deviceFrom===null">
+          连接设备
         </el-button>
       </el-col>
       <el-col :span="2">
@@ -89,8 +113,9 @@
 </template>
 
 <script>
-import {connect} from "@/api/ui"
+import {connect, getLocalDevices} from "@/api/ui"
 import {Python} from "@/utils/doPython";
+import {message} from "@/utils/tools";
 
 export default {
   name: "DeviceHeader",
@@ -100,6 +125,11 @@ export default {
         {key: "Android", value: "Android"},
         {key: "iOS", value: "iOS"}
       ],
+      deviceFrom: null,
+      deviceFromOptions: [{label: "自由", value: "free"}, {label: "本地", value: "local"}],
+      deviceList: [],
+      deviceMapping: {},
+      localDeviceId: null,
       platform: this.$store.getters.getPlatform,
       ScreenUrl: this.$store.getters.getScreenUrl,
       iosScreenUrl: this.$store.getters.getBaseIosScreenUrl,
@@ -113,6 +143,30 @@ export default {
     platform: function (event) {
       this.$store.commit("setPlatform", event)
       this.python.platform = event
+    },
+    deviceFrom: function (event) {
+      if (event === "local") {
+        this.serial = null
+        this.toGetLocalDevices()
+      } else {
+        this.localDeviceId = null
+        this.platform = this.$store.getters.getPlatform
+        this.ScreenUrl = this.$store.getters.getScreenUrl
+        this.iosScreenUrl = this.$store.getters.getBaseIosScreenUrl
+      }
+    },
+    localDeviceId: function (event) {
+      if (event !== null) {
+        const deviceData = this.deviceMapping[this.localDeviceId]
+        if (deviceData.device_type === 'android') {
+          this.platform = "Android"
+          this.serial = `${deviceData.host}:${deviceData.udid}`
+        } else {
+          this.platform = 'iOS'
+          this.serial = deviceData.udid_data.wda_url
+          this.iosScreenUrl = deviceData.udid_data.screen_url
+        }
+      }
     },
     deviceId: function (event) {
       this.$store.commit("setDeviceId", event)
@@ -153,6 +207,19 @@ export default {
     }
   },
   methods: {
+    toGetLocalDevices() {
+      getLocalDevices().then(response => {
+        if (response.code === 20000) {
+          this.deviceList = response.data
+          this.deviceMapping = {}
+          for (const index in this.deviceList) {
+            const temp = this.deviceList[index]
+            this.deviceMapping[temp.udid] = temp
+          }
+          message("刷新本地设备成功!", "请查看设备列表")
+        }
+      })
+    },
     pythonReConnect() {
       this.python.initPythonWebSocket()
       setTimeout(() => this.python.runPython(this.python.generatePreloadCode()), 2000)

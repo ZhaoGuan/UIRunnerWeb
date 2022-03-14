@@ -40,6 +40,9 @@
           <el-button type="success" :size="formItemSize" @click="androidSetOrientation">
             旋转屏幕
           </el-button>
+          <el-upload action="" :auto-upload="false" :on-change="loadYamlCase" accept=".yaml" :show-file-list="false">
+            <el-button type="info" :size="formItemSize">导入用例</el-button>
+          </el-upload>
         </el-form-item>
       </el-form>
     </el-collapse-item>
@@ -118,7 +121,6 @@
         <el-button type="danger" size="mini" @click="clearActionList">清空动作</el-button>
       </el-col>
       <ScreenTool ref="ScreenTool"/>
-      <swipeDialog ref="swipeDialog"/>
       <el-table
           :data="actionList"
           stripe
@@ -396,6 +398,7 @@ export default {
               'performance': false,
               'perfHost': "ip",
             },
+        'ORIENTATION': null,
         'ALERT_CLOSE_ELEMENTS': [],
         'ACTIONS': []
       }
@@ -480,6 +483,20 @@ export default {
           }
         })
       }
+    },
+    loadYamlCase(f) {
+      let yaml = require('js-yaml')
+      const reader = new FileReader()
+      let that = this
+      reader.onload = function () {
+        if (reader.result) {
+          const caseData = yaml.safeLoad(reader.result)
+          that.template = caseData
+          that.$store.commit("setActionList", caseData["ACTIONS"])
+          that.$store.commit("setAlertClose", caseData["ALERT_CLOSE_ELEMENTS"])
+        }
+      }
+      reader.readAsText(f.raw)
     }
   }
 }

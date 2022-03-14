@@ -144,7 +144,7 @@ export default {
       useXPathOnly: false,
       canvas: null,
       cursor: {},
-      showCursorPercent: true,
+      showCursorPercent: false,
       mapAttrCount: {},
       originNodeMaps: null,
       customizeLocation: null,
