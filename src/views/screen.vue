@@ -212,7 +212,8 @@ export default {
     },
     // iOS live screen
     iosLiveScreen: function () {
-      const img = document.getElementById('canvas-bg-ios')
+      let img = document.getElementById('canvas-bg-ios')
+      img.crossorigin = "use-credentials"
       img.src = this.$store.getters.getIosScreenUrl
       this.resizeScreen(img)
     },

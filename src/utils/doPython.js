@@ -92,7 +92,6 @@ Python.generatePreloadCode = function () {
             `md = MobileDriver("ios","${deviceUrl}")`,
             "d = md()",
             "action = MobileCustomize(d)",
-            "d.session_id"
         ]
     } else if (m[1] === "android") {
         codeLines = [
