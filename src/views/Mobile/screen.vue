@@ -1,8 +1,8 @@
 <template>
-  <el-card shadow="hover">
-    <section class="screen">
+  <el-card shadow="never">
+    <div class="screen">
       <el-row id="screen" class="screen-box">
-        <img style="z-index: 10;" v-if="loading" src="../assets/loading.svg">
+        <img style="z-index: 10;" v-if="loading" src="../../assets/loading.svg">
         <canvas id="fgCanvas" @dblclick="doTap(nodeSelected)" class="canvas-fg"
                 v-bind:style="canvasStyle"></canvas>
         <canvas v-show="(platform==='iOS'&&liveScreen===false)||platform==='Android'" id="bgCanvas"
@@ -17,7 +17,7 @@
         <el-button size="mini" @click="doKeyEvent('back')" v-show="platform === 'Android'">BACK</el-button>
         <el-button size="mini" @click="iOSBack" v-show="platform === 'iOS'">BACK</el-button>
       </el-row>
-    </section>
+    </div>
   </el-card>
 </template>
 
@@ -632,9 +632,10 @@ export default {
 
 .screen {
   /*居中方法*/
-  height: 85vh;
+  height: 84vh;
   width: 100%;
   position: relative;
+  content: none;
 }
 
 .canvas-fg {

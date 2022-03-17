@@ -184,7 +184,7 @@
 
 <script>
 import {Python} from "@/utils/doPython";
-import funcDialog from "./components/funcDialog"
+import funcDialog from "../components/funcDialog"
 import {message} from "@/utils/tools";
 import {caseTest, taskResult} from "@/api/ui";
 import ScreenTool from "@/views/components/screenTool"

@@ -236,7 +236,6 @@ export default {
         this.$store.commit("setScreenUrl", ret.data.screenWebSocketUrl)
         this.python.platform = this.platform
         this.python.deviceId = deviceId
-        console.log(deviceId)
         this.python.callBackData = [
           {
             func: this.$store.dispatch,

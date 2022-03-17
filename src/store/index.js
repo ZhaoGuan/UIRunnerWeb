@@ -194,14 +194,12 @@ const store = new Vuex.Store({
             commit("setLoading", true)
         },
         screenRefresh({commit}) {
-            if (!this.getters.getLiveScreen) {
-                commit("setLoading", true)
-                screenshot(this.getters.getDeviceId)
-                    .then(function (ret) {
-                        commit("setImgBlob", b64toBlob(ret.data.data, 'image/' + ret.data.type))
-                        commit("setLoading", false)
-                    })
-            }
+            commit("setLoading", true)
+            screenshot(this.getters.getDeviceId)
+                .then(function (ret) {
+                    commit("setImgBlob", b64toBlob(ret.data.data, 'image/' + ret.data.type))
+                    commit("setLoading", false)
+                })
         },
         hierarchyRefresh({commit}) {
             if (!this.getters.getLiveScreen) {
@@ -220,7 +218,9 @@ const store = new Vuex.Store({
             // return state.jsonHierarchy
         },
         RefreshHierarchyWithScreen({commit}) {
-            this.screenRefresh(commit)
+            if (!this.getters.getLiveScreen) {
+                this.screenRefresh(commit)
+            }
             this.hierarchyRefresh(commit)
             commit("setLoading", false)
         },
