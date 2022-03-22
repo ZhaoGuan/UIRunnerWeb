@@ -15,12 +15,12 @@
       <div class="text-center">
         <el-button size="mini" v-show="platform==='Android'" @click="doUnlock()">Unlock</el-button>
         <el-button size="mini" v-show="platform==='Android'" @click="doSendKeys('')">Send Keys</el-button>
-        <el-button size="mini" v-show="platform==='Android'" @click="doKeyEventNu('66')">Enter</el-button>
         <el-button size="mini" :disabled="!nodeSelected" @click="doTap()">Tap
         </el-button>
         <el-button size="mini" :disabled="!nodeSelected" @click="doSetText('')">
           Send Text
         </el-button>
+        <el-button size="mini" :disabled="!nodeSelected" @click="doEnter">Enter</el-button>
         <el-button size="mini" :disabled="!nodeSelected" @click="doClear()">Clear
           Text
         </el-button>
@@ -268,6 +268,13 @@ export default {
       this.python.doPositionTap(x, y)
     }, clickTestLocation() {
       this.python.doClick(this.customizeLocation)
+    }, doEnter() {
+      if (this.platform === 'Android') {
+        this.doKeyEventNu('66')
+      } else {
+        this.python.doSetText("\\n")
+      }
+
     }
   }
 }

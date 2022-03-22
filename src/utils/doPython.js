@@ -11,6 +11,8 @@ Python.pyshell = {
 Python.loading = null
 Python.platform = null
 Python.deviceId = null
+// TODO WDA能获取到DeviceId这个就不需要了
+Python.iosDeviceId = null
 Python.canvas = null
 Python.setLoadingData = []
 Python.running = false
@@ -36,7 +38,6 @@ Python.callBack = function () {
     }
 }
 Python.nodeSelectedXpath = null
-// Functions
 Python.initPythonWebSocket = function () {
     // 初始化变量
     const proEnv = require('@/config/pro.env'); // 生产环境
@@ -80,16 +81,24 @@ Python.initPythonWebSocket = function () {
         console.log("websocket closed")
     }
 }
+// Mobile Functions
 Python.generatePreloadCode = function () {
     const m = this.deviceId.match(/^([^:]+):(.*)/)
     const deviceUrl = m[2]
     let codeLines;
     if (m[1] === "ios") {
+        let md = ""
+        //TODO WDA能获取设备ID后就不需要了
+        if (this.iosDeviceId) {
+            md = `md = MobileDriver("ios","${deviceUrl}","${this.iosDeviceId}")`
+        } else {
+            md = `md = MobileDriver("ios","${deviceUrl}")`
+        }
         codeLines = [
             "import os",
             "from mobile.mobile_driver import MobileDriver",
             "from mobile.mobile_customize_action import MobileCustomize",
-            `md = MobileDriver("ios","${deviceUrl}")`,
+            md,
             "d = md()",
             "action = MobileCustomize(d)",
         ]
@@ -236,6 +245,10 @@ Python.androidUnlock = function (passWord) {
     const code = `md.android_unlock('${passWord}')`
     this.runPython(code)
 }
+Python.iosUnlock = function (passWord) {
+    const code = `md.ios_unlock('${passWord}')`
+    this.runPython(code)
+}
 Python.findElement = function (location) {
     const code = `action.wait_element('${location}')`
     this.runPython(code)
@@ -259,5 +272,24 @@ Python.doFuncTest = function (value) {
         params += `${key}='${value.DATA[key]}',`
     }
     const code = `action.${func}(${params})`
+    this.runPython(code)
+}
+// Web Functions
+Python.webDriverConnect = function (driverUrl, sessionId) {
+    let codeLines;
+    codeLines = [
+        "import os",
+        "from web.selenium_driver import session_driver",
+        "from web.selenium_customize_action import WebCustomize",
+        `driver = session_driver("${driverUrl}","${sessionId}")`,
+        "action = WebCustomize(driver)",
+    ]
+    this.pyshell.base = true
+    codeLines = codeLines.join("\n") + "\n";
+    console.log(codeLines)
+    return codeLines
+}
+Python.getUrl = function (url) {
+    const code = `action.web_get_url("${url}")`
     this.runPython(code)
 }

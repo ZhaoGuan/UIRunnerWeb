@@ -1,159 +1,161 @@
 <template>
-  <el-collapse>
-    <el-collapse-item title="基础设置">
-      <el-form :model="template" :rules="rules" ref="templateForm">
-        <el-form-item :size="formItemSize" label="用例名称" prop="TITLE">
-          <el-input :size="formItemSize" label="用例名称" v-model="template.TITLE"></el-input>
-        </el-form-item>
-        <el-form-item :size="formItemSize" label="用例描述" prop="DESCRIPTION">
-          <el-input :size="formItemSize" v-model="template.DESCRIPTION"></el-input>
-        </el-form-item>
-        <el-form-item :size="formItemSize" label="URL" prop="DESIRED_CAPS.URL">
-          <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.passWord"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button :disabled="show" type="success" :size="formItemSize" @click="startApp">访问地址</el-button>
-          <el-button type="success" :size="formItemSize" @click="clearTemplate">清空设置</el-button>
-          <el-upload action="" :auto-upload="false" :on-change="loadYamlCase" accept=".yaml" :show-file-list="false">
-            <el-button type="info" :size="formItemSize">导入用例</el-button>
-          </el-upload>
-        </el-form-item>
-      </el-form>
-    </el-collapse-item>
-    <el-collapse-item title="弹窗关闭">
-      <el-col :span="14">
-        <el-input size="mini" v-model="alertCloseName"></el-input>
-      </el-col>
-      <el-col :span="10">
-        <el-col :span="8">
-          <el-select size="mini" v-model="alertCloseAction">
-            <el-option
-                v-for="item in alertCloseActionOptions"
-                :key="item.value"
-                :label="item.value"
-                :value="item.value">
-            </el-option>
-          </el-select>
+  <div style="overflow: auto">
+    <el-collapse>
+      <el-collapse-item title="基础设置">
+        <el-form :model="template" :rules="rules" ref="templateForm">
+          <el-form-item :size="formItemSize" label="用例名称" prop="TITLE">
+            <el-input :size="formItemSize" label="用例名称" v-model="template.TITLE"></el-input>
+          </el-form-item>
+          <el-form-item :size="formItemSize" label="用例描述" prop="DESCRIPTION">
+            <el-input :size="formItemSize" v-model="template.DESCRIPTION"></el-input>
+          </el-form-item>
+          <el-form-item :size="formItemSize" label="URL" prop="DESIRED_CAPS.URL">
+            <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.URL"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="show" type="success" :size="formItemSize" @click="getUrl">访问地址</el-button>
+            <el-button type="success" :size="formItemSize" @click="clearTemplate">清空设置</el-button>
+            <el-upload action="" :auto-upload="false" :on-change="loadYamlCase" accept=".yaml" :show-file-list="false">
+              <el-button type="info" :size="formItemSize">导入用例</el-button>
+            </el-upload>
+          </el-form-item>
+        </el-form>
+      </el-collapse-item>
+      <el-collapse-item title="弹窗关闭">
+        <el-col :span="14">
+          <el-input size="mini" v-model="alertCloseName"></el-input>
         </el-col>
-        <el-col :span="16">
-          <el-button type="success" size="mini" @click="addAlertClose">添加Alert关闭元素</el-button>
+        <el-col :span="10">
+          <el-col :span="8">
+            <el-select size="mini" v-model="alertCloseAction">
+              <el-option
+                  v-for="item in alertCloseActionOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="16">
+            <el-button type="success" size="mini" @click="addAlertClose">添加Alert关闭元素</el-button>
+          </el-col>
         </el-col>
-      </el-col>
-      <el-table :data="alertCloseList">
-        <el-table-column
-            prop="name"
-            label="名称"
-            width="150"
-        />
-        <el-table-column
-            prop="action"
-            label="动作"
-            width="100"
-        />
-        <el-table-column
-            prop="value"
-            label="元素定位"
-        />
-        <el-table-column label="操作" width="100">
-          <template slot-scope="scope">
-            <el-button size="mini" type="danger"
-                       @click="delAlertClose(scope.row)">DELETE
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-collapse-item>
-    <el-collapse-item title="动作列表">
-      <funcDialog ref="funcDialog"/>
-      <el-col :span="4">
-        <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
-      </el-col>
-      <el-col :span="4">
-        <el-popover
-            placement="top-start"
-            title="规则"
-            :width="50"
-            trigger="hover"
-            content='如果保存了自定义路径则会使用自定义路径'
-        >
-          <template #reference>
-            <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>
-          </template>
-        </el-popover>
-      </el-col>
-      <el-col :span="4">
-        <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>
-      </el-col>
-      <el-col :span="4">
-        <el-button type="success" :disabled="$store.getters.getSwipePoint===null" size="mini" @click="addSwipe">获取页面滑动
-        </el-button>
-      </el-col>
-      <el-col :span="4">
-        <el-button :disabled="show" type="success" size="mini" @click="$refs.ScreenTool.openDialog()">图像识别</el-button>
-      </el-col>
-      <el-col :span="4">
-        <el-button type="danger" size="mini" @click="clearActionList">清空动作</el-button>
-      </el-col>
-      <ScreenTool ref="ScreenTool"/>
-      <el-table
-          :data="actionList"
-          stripe
-          style="width: 100%">
-        <el-table-column
-            prop="NAME"
-            label="动作名称"
-        />
-        <el-table-column
-            prop="TYPE"
-            label="方法"
-        />
-        <el-table-column label="操作" width="250">
-          <template slot-scope="scope">
-            <el-button size="mini" icon="el-icon-arrow-up"
-                       @click="actionUp(scope.row)">
-            </el-button>
-            <el-button size="mini" icon="el-icon-arrow-down"
-                       @click="actionDown(scope.row)">
-            </el-button>
-            <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
-            <!--            <el-button size="mini" type="success"-->
-            <!--                       @click="editAction(scope.row)">EDIT-->
-            <!--            </el-button>-->
-            <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-row>
-        <el-button :disabled="show" type="success" size="mini" @click="yamlCase">生成YML用例
-        </el-button>
-        <el-button :disabled="show" type="danger" size="mini" @click="runCase">运行</el-button>
-      </el-row>
-      <div v-if="debugTaskResult">
-        <el-table
-            :data="debugTaskResult"
-            :show-header="true"
-            style="width: 100%"
-        >
+        <el-table :data="alertCloseList">
           <el-table-column
-              label="动作名称"
-              prop="label"
-              min-width="180">
-          </el-table-column>
+              prop="name"
+              label="名称"
+              width="150"
+          />
           <el-table-column
-              label="结果"
-              prop="result"
-              min-width="80">
-          </el-table-column>
+              prop="action"
+              label="动作"
+              width="100"
+          />
           <el-table-column
-              label="信息"
-              prop="message"
-              min-width="180"
-          >
+              prop="value"
+              label="元素定位"
+          />
+          <el-table-column label="操作" width="100">
+            <template slot-scope="scope">
+              <el-button size="mini" type="danger"
+                         @click="delAlertClose(scope.row)">DELETE
+              </el-button>
+            </template>
           </el-table-column>
         </el-table>
-      </div>
-    </el-collapse-item>
-  </el-collapse>
+      </el-collapse-item>
+      <el-collapse-item title="动作列表">
+        <funcDialog ref="funcDialog"/>
+        <el-col :span="4">
+          <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
+        </el-col>
+        <!--        <el-col :span="4">-->
+        <!--          <el-popover-->
+        <!--              placement="top-start"-->
+        <!--              title="规则"-->
+        <!--              :width="50"-->
+        <!--              trigger="hover"-->
+        <!--              content='如果保存了自定义路径则会使用自定义路径'-->
+        <!--          >-->
+        <!--            <template #reference>-->
+        <!--              <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>-->
+        <!--            </template>-->
+        <!--          </el-popover>-->
+        <!--        </el-col>-->
+        <!--        <el-col :span="4">-->
+        <!--          <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>-->
+        <!--        </el-col>-->
+        <!--        <el-col :span="4">-->
+        <!--          <el-button type="success" :disabled="$store.getters.getSwipePoint===null" size="mini" @click="addSwipe">获取页面滑动-->
+        <!--          </el-button>-->
+        <!--        </el-col>-->
+        <el-col :span="4">
+          <el-button :disabled="show" type="success" size="mini" @click="$refs.ScreenTool.openDialog()">图像识别</el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-button type="danger" size="mini" @click="clearActionList">清空动作</el-button>
+        </el-col>
+        <ScreenTool ref="ScreenTool" device-type="web"/>
+        <el-table
+            :data="actionList"
+            stripe
+            style="width: 100%">
+          <el-table-column
+              prop="NAME"
+              label="动作名称"
+          />
+          <el-table-column
+              prop="TYPE"
+              label="方法"
+          />
+          <el-table-column label="操作" width="250">
+            <template slot-scope="scope">
+              <el-button size="mini" icon="el-icon-arrow-up"
+                         @click="actionUp(scope.row)">
+              </el-button>
+              <el-button size="mini" icon="el-icon-arrow-down"
+                         @click="actionDown(scope.row)">
+              </el-button>
+              <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
+              <!--            <el-button size="mini" type="success"-->
+              <!--                       @click="editAction(scope.row)">EDIT-->
+              <!--            </el-button>-->
+              <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-row>
+          <el-button :disabled="show" type="success" size="mini" @click="yamlCase">生成YML用例
+          </el-button>
+          <el-button :disabled="show" type="danger" size="mini" @click="runCase">运行</el-button>
+        </el-row>
+        <div v-if="debugTaskResult">
+          <el-table
+              :data="debugTaskResult"
+              :show-header="true"
+              style="width: 100%"
+          >
+            <el-table-column
+                label="动作名称"
+                prop="label"
+                min-width="180">
+            </el-table-column>
+            <el-table-column
+                label="结果"
+                prop="result"
+                min-width="80">
+            </el-table-column>
+            <el-table-column
+                label="信息"
+                prop="message"
+                min-width="180"
+            >
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-collapse-item>
+    </el-collapse>
+  </div>
 </template>
 
 <script>
@@ -173,7 +175,11 @@ export default {
       actionList: this.$store.getters.getActionList,
       alertCloseName: null,
       alertCloseAction: "click",
-      alertCloseActionOptions: [{value: "click"}, {value: "back"}],
+      alertCloseActionOptions: [
+        {label: "点击", value: "click"},
+        {label: "接受弹窗", value: "accept_alert"},
+        {label: "取消弹窗", value: "cancel_alert"}
+      ],
       template: {
         'TITLE': null,
         'DESCRIPTION': null,
@@ -234,6 +240,9 @@ export default {
 
   },
   methods: {
+    getUrl() {
+      this.python.getUrl(this.template.DESIRED_CAPS.URL)
+    },
     startApp() {
       const appPackage = this.template.DESIRED_CAPS.appPackage
       const appActivity = this.template.DESIRED_CAPS.appActivity

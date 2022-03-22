@@ -8,7 +8,7 @@
         <el-form-item :size="formItemSize" label="用例描述" prop="DESCRIPTION">
           <el-input :size="formItemSize" v-model="template.DESCRIPTION"></el-input>
         </el-form-item>
-        <el-form-item v-if="platform==='ANDROID'" :size="formItemSize" label="设备密码" prop="DESIRED_CAPS.passWord">
+        <el-form-item :size="formItemSize" label="设备密码" prop="DESIRED_CAPS.passWord">
           <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.passWord"></el-input>
         </el-form-item>
         <el-form-item :size="formItemSize" label="appPackage" prop="DESIRED_CAPS.appPackage">
@@ -32,7 +32,7 @@
           </el-popover>
         </el-form-item>
         <el-form-item>
-          <el-button :disabled="show" v-if="platform==='ANDROID'" type="success" :size="formItemSize"
+          <el-button :disabled="show" type="success" :size="formItemSize"
                      @click="unlockDevice">解锁设备
           </el-button>
           <el-button :disabled="show" type="success" :size="formItemSize" @click="startApp">启动应用</el-button>
@@ -120,7 +120,7 @@
       <el-col :span="4">
         <el-button type="danger" size="mini" @click="clearActionList">清空动作</el-button>
       </el-col>
-      <ScreenTool ref="ScreenTool"/>
+      <ScreenTool ref="ScreenTool" device-type="mobile"/>
       <el-table
           :data="actionList"
           stripe
@@ -270,7 +270,11 @@ export default {
   },
   methods: {
     unlockDevice() {
-      this.python.androidUnlock(this.template.DESIRED_CAPS.passWord)
+      if (this.platform === 'ANDROID') {
+        this.python.androidUnlock(this.template.DESIRED_CAPS.passWord)
+      } else {
+        this.python.iosUnlock(this.template.DESIRED_CAPS.passWord)
+      }
     },
     androidSetOrientation() {
       if (this.template.ORIENTATION) {

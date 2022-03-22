@@ -79,10 +79,15 @@ export default {
       document.body.addEventListener(
           'click',
           async () => {
-            const text = await navigator.clipboard.readText();
-            if (this.rfb) {
-              this.rfb.clipboardPasteFrom(text)
+            try {
+              const text = await navigator.clipboard.readText();
+              if (this.rfb) {
+                this.rfb.clipboardPasteFrom(text)
+              }
+            } catch (e) {
+              console.log(e)
             }
+
           }
       )
     }

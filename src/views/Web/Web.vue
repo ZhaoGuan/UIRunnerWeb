@@ -6,18 +6,18 @@
           <el-select size="mini" v-model="selected" placeholder="请选择Web Docker" style="width: 100%">
             <el-option
                 v-for="item in chromeList"
-                :key="item.chromeIndex"
-                :label="`本地ChromeDocker-序号-${item.chromeIndex}`"
-                :value="item.chromeIndex">
+                :key="item.dockerName"
+                :label="`本地ChromeDocker:${item.dockerName}`"
+                :value="item.dockerName">
             </el-option>
           </el-select>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="14" style="text-align: left">
           <el-button size="mini" type="success" @click="doCreateDocker">创建Web Docker</el-button>
           <el-button size="mini" type="success" @click="doGetChromeList" icon="el-icon-refresh-left"/>
           <el-button size="mini" type="success" :disabled="selected===null" @click="connectWebDocker">连接
           </el-button>
-          <el-button size="mini" type="danger" icon="el-icon-delete" @click="doStopDocker"/>
+          <el-button size="mini" type="danger" :disabled="selected===null" icon="el-icon-delete" @click="doStopDocker"/>
         </el-col>
       </el-card>
     </el-row>
@@ -28,9 +28,11 @@
         </el-card>
       </el-col>
       <el-col :span="12">
-        <el-card shadow="never">
-          <WebUICase ref="WebUICase"/>
-        </el-card>
+        <el-tabs type="border-card" style="height: 89vh;overflow: auto;">
+          <el-tab-pane label="用例动作">
+            <WebUICase ref="WebUICase"/>
+          </el-tab-pane>
+        </el-tabs>
       </el-col>
     </el-row>
   </div>
@@ -41,6 +43,7 @@ import vncView from "@/views/VncView/vncView"
 import {getChromeList, createChrome, stopChrome, getDriver} from "@/api/ui"
 import {message} from "@/utils/tools";
 import WebUICase from "@/views/Web/WebUICase"
+import {Python} from "@/utils/doPython";
 
 export default {
   name: "Web",
@@ -49,24 +52,38 @@ export default {
     return {
       chromeList: [],
       selected: null,
-      chromeData: null
+      chromeData: null,
+      driverData: null,
+      python: Python
     }
   },
-  watch: {
-    // selected: function (event) {
-    //   console.log(event)
-    //   this.$refs.vncView.connectVnc(this.chromeList[event].token)
-    // }
+  watch: {},
+  computed: {
+    chromeMapping() {
+      let chromeMapping = {}
+      for (const index in this.chromeList) {
+        const temp = this.chromeList[index]
+        chromeMapping[temp.dockerName] = temp
+        this.$store.commit("setWebDockerName", temp.dockerName)
+      }
+      return chromeMapping
+    }
   },
-  computed: {},
-  mounted() {
+  created() {
+    if (this.python.pyshell.wsOpen) {
+      this.python.pyshell.ws.close()
+    }
+    this.$store.commit("setDeviceType", "web")
     this.doGetChromeList()
+  },
+  mounted() {
   },
   methods: {
     doGetChromeList() {
       getChromeList().then(res => {
         if (res.code === 20000) {
           this.chromeList = res.data
+          this.selected = null
         }
         message("刷新WebDocker列表成功!", "请查看WebDocker列表")
       })
@@ -80,22 +97,25 @@ export default {
       })
     },
     doStopDocker() {
-      stopChrome({index: this.selected}).then(res => {
+      stopChrome({dockerName: this.selected}).then(res => {
         if (res.code === 20000) {
           this.$refs.vncView.show = false
           this.selected = null
+          this.driverData = null
           this.doGetChromeList()
         }
       })
     },
     connectWebDocker() {
-      this.$refs.vncView.connectVnc(this.chromeList[this.selected].token)
+      this.$refs.vncView.connectVnc(this.chromeMapping[this.selected].token)
       getDriver(this.selected).then(res => {
         if (res.code === 20000) {
-          console.log(res.data)
+          this.driverData = res.data
+          this.python.initPythonWebSocket()
+          setTimeout(() => this.python.runPython(this.python.webDriverConnect(this.driverData.url, this.driverData.sessionId)), 2000)
         }
       })
-    }
+    },
   }
 }
 </script>

@@ -2,16 +2,17 @@
   <el-dialog title="添加动作" :visible.sync="funcDialog" @close="clearDialog">
     <el-form label-width="150px">
       <el-form-item label="动作名称">
-        <el-input v-model.trim="actionName">动作名称</el-input>
+        <el-input v-model.trim="actionName" size="mini">动作名称</el-input>
       </el-form-item>
       <el-form-item v-if="customizeLocation" label="自定义定位">
-        <el-checkbox v-model="useCustomizeLocation">是否使用自定义路径</el-checkbox>
+        <el-checkbox v-model="useCustomizeLocation" size="mini">是否使用自定义路径</el-checkbox>
         <el-input size="mini" :value="customizeLocation"></el-input>
       </el-form-item>
       <el-form-item label="选择方法">
-        <el-select v-model="func" placeholder="请选择" style="width: 100%">
+        <el-select v-model="func" size="mini" placeholder="请选择" style="width: 100%">
           <el-option
               v-for="item in funcList"
+              size="mini"
               :key="item.func"
               :label="item.name"
               :value="item.func">
@@ -22,12 +23,11 @@
         </el-input>
       </el-form-item>
       <el-form-item v-for="(key) in funcData.params" v-bind:key="key" :label="key">
-        <el-switch v-if="key.substring(0,3)==='is_'" v-model="funcParams[key]" active-text="false"
+        <el-switch v-if="key.substring(0,3)==='is_'" size="mini" v-model="funcParams[key]" active-text="false"
                    inactive-text="true"/>
         <fucSelect v-else-if="key==='func'" ref="fucSelect"/>
-        <el-input v-else-if="key==='location'" size="mine"
-                  v-model="elementLocation"></el-input>
-        <el-input v-else-if="key==='params'" size="mine" :disabled="true" value="参数为所选方法参数"></el-input>
+        <el-input v-else-if="key==='location'" size="mini" v-model="elementLocation"></el-input>
+        <el-input v-else-if="key==='params'" size="mini" :disabled="true" value="参数为所选方法参数"></el-input>
         <el-input v-else size="mini" v-model="funcParams[key]"></el-input>
       </el-form-item>
     </el-form>

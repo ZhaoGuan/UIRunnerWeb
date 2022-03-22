@@ -102,12 +102,6 @@
         <el-button size="mini" v-if="platform==='iOS'&&liveScreen" class="btn btn-default" @click="iosLiveScreen">刷新
         </el-button>
       </el-col>
-      <el-col :span="1">
-        <el-button size="mini" type="danger" v-if="pythonReconnect===false" class="btn btn-default"
-                   @click="pythonReConnect">
-          重连
-        </el-button>
-      </el-col>
     </el-row>
   </el-card>
 </template>
@@ -140,6 +134,13 @@ export default {
     }
   },
   watch: {
+    "this.python.pyshell.wsOpen": function (event) {
+      if (!event) {
+        this.python.initPythonWebSocket()
+        setTimeout(() => this.python.runPython(this.python.generatePreloadCode()), 2000)
+      }
+
+    },
     platform: function (event) {
       this.$store.commit("setPlatform", event)
       this.python.platform = event
@@ -196,15 +197,11 @@ export default {
     }
   },
   created() {
-    this.python.initPythonWebSocket()
   },
   computed: {
     loading() {
       return this.$store.getters.getLoading
     },
-    pythonReconnect() {
-      return Python.pyshell.wsOpen
-    }
   },
   methods: {
     toGetLocalDevices() {
@@ -220,11 +217,9 @@ export default {
         }
       })
     },
-    pythonReConnect() {
+    doConnect() {
       this.python.initPythonWebSocket()
       setTimeout(() => this.python.runPython(this.python.generatePreloadCode()), 2000)
-    },
-    doConnect() {
       this.$store.commit("setLoading", true)
       connect({
         deviceUrl: this.serial,
@@ -236,6 +231,8 @@ export default {
         this.$store.commit("setScreenUrl", ret.data.screenWebSocketUrl)
         this.python.platform = this.platform
         this.python.deviceId = deviceId
+        // TODO WDA能获取到DeviceId这个就不需要了
+        this.python.iosDeviceId = this.localDeviceId
         this.python.callBackData = [
           {
             func: this.$store.dispatch,

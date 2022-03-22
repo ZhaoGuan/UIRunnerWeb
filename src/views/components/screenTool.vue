@@ -34,6 +34,7 @@ import {Python} from "@/utils/doPython";
 
 export default {
   name: "ScreenTool",
+  props: ['deviceType'],
   data() {
     return {
       screenToolDialog: false,
@@ -58,6 +59,9 @@ export default {
   mounted() {
   },
   watch: {
+    deviceType: function (event) {
+      this.$store.commit("setDeviceType", event)
+    },
     "$store.state.imgBlob": function () {
       if (!this.afterImg && this.screenToolDialog) {
         this.reFlashScreen()

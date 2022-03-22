@@ -79,10 +79,19 @@ export function stopChrome(body) {
     })
 }
 
-export function getDriver(index) {
+export function getDriver(dockerName) {
     return request({
         url: '/web-docker-driver',
         method: 'get',
-        params: {index}
+        params: {dockerName}
+    })
+}
+
+
+export function getDockerDriverScreen(dockerName) {
+    return request({
+        url: '/web-docker/screen',
+        method: 'get',
+        params: {dockerName}
     })
 }
