@@ -54,22 +54,31 @@ export default {
       selected: null,
       chromeData: null,
       driverData: null,
-      python: Python
+      python: Python,
+      sideex: null
     }
   },
-  watch: {},
+  watch: {
+    "this.sideex.file.command": function (event) {
+      console.log(event)
+    },
+    selected: function (event) {
+      console.log(event)
+      this.$store.commit("setWebDockerName", event)
+    }
+  },
   computed: {
     chromeMapping() {
       let chromeMapping = {}
       for (const index in this.chromeList) {
         const temp = this.chromeList[index]
         chromeMapping[temp.dockerName] = temp
-        this.$store.commit("setWebDockerName", temp.dockerName)
       }
       return chromeMapping
     }
   },
   created() {
+    this.sideex = new SideeX()
     if (this.python.pyshell.wsOpen) {
       this.python.pyshell.ws.close()
     }

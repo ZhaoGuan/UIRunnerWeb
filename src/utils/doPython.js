@@ -279,7 +279,7 @@ Python.webDriverConnect = function (driverUrl, sessionId) {
     let codeLines;
     codeLines = [
         "import os",
-        "from web.selenium_driver import session_driver",
+        "from common.remote_driver import session_driver",
         "from web.selenium_customize_action import WebCustomize",
         `driver = session_driver("${driverUrl}","${sessionId}")`,
         "action = WebCustomize(driver)",
@@ -289,7 +289,11 @@ Python.webDriverConnect = function (driverUrl, sessionId) {
     console.log(codeLines)
     return codeLines
 }
-Python.getUrl = function (url) {
-    const code = `action.web_get_url("${url}")`
-    this.runPython(code)
+Python.getUrl = function (url, dockerName) {
+    let codeLines = [
+        `action.web_get_url("${url}")`,
+        `driver.execute_script('return localStorage.setItem("dockerName","${dockerName}")')`
+    ]
+    codeLines = codeLines.join("\n") + "\n";
+    this.runPython(codeLines)
 }

@@ -23,22 +23,19 @@
       </el-collapse-item>
       <el-collapse-item title="弹窗关闭">
         <el-col :span="14">
-          <el-input size="mini" v-model="alertCloseName"></el-input>
+          <el-input size="mini" v-model="alertCloseName" placeholder="弹窗操作名称"></el-input>
+          <el-input size="mini" v-model="alertElementLocation" placeholder="定位Xpath"></el-input>
         </el-col>
         <el-col :span="10">
-          <el-col :span="8">
-            <el-select size="mini" v-model="alertCloseAction">
-              <el-option
-                  v-for="item in alertCloseActionOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-              </el-option>
-            </el-select>
-          </el-col>
-          <el-col :span="16">
-            <el-button type="success" size="mini" @click="addAlertClose">添加Alert关闭元素</el-button>
-          </el-col>
+          <el-select size="mini" v-model="alertCloseAction">
+            <el-option
+                v-for="item in alertCloseActionOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+            </el-option>
+          </el-select>
+          <el-button type="success" size="mini" @click="addAlertClose">添加Alert关闭元素</el-button>
         </el-col>
         <el-table :data="alertCloseList">
           <el-table-column
@@ -174,6 +171,7 @@ export default {
       deviceName: this.$store.getters.getSerial,
       actionList: this.$store.getters.getActionList,
       alertCloseName: null,
+      alertElementLocation: null,
       alertCloseAction: "click",
       alertCloseActionOptions: [
         {label: "点击", value: "click"},
@@ -241,7 +239,10 @@ export default {
   },
   methods: {
     getUrl() {
-      this.python.getUrl(this.template.DESIRED_CAPS.URL)
+      if (this.template.DESIRED_CAPS.URL) {
+        console.log(this.$store.getters.getWebDockerName)
+        this.python.getUrl(this.template.DESIRED_CAPS.URL, this.$store.getters.getWebDockerName)
+      }
     },
     startApp() {
       const appPackage = this.template.DESIRED_CAPS.appPackage
@@ -252,7 +253,7 @@ export default {
       this.$refs.funcDialog.openDialog()
     },
     addAlertClose() {
-      const element = this.$store.getters.getSelectedElement
+      const element = this.alertElementLocation
       if (element === null) {
         return
       }
@@ -264,6 +265,7 @@ export default {
       this.$store.commit("setAlertClose", alertCloseList)
       this.$store.commit("setSaveAlertClose", JSON.stringify(alertCloseList))
       this.alertCloseName = null
+      this.alertElementLocation = null
     },
     delAlertClose(data) {
       this.alertCloseList.splice(this.alertCloseList.indexOf(data), 1)
