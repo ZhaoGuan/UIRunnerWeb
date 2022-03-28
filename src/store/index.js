@@ -46,6 +46,9 @@ const store = new Vuex.Store({
         swipePoint: null,
         deviceType: null,
         webDockerName: null,
+        sessionId: null,
+        driverUrl: null,
+        webXpath: null
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -88,7 +91,10 @@ const store = new Vuex.Store({
         getSaveScreen: state => state.saveScreen,
         getSwipePoint: state => state.swipePoint,
         getDeviceType: state => state.deviceType,
-        getWebDockerName: state => state.webDockerName
+        getWebDockerName: state => state.webDockerName,
+        getDriverUrl: state => state.driverUrl,
+        getSessionId: state => state.sessionId,
+        getWebXpath: state => state.webXpath
     },
     mutations: {
         setDeviceUrl(state, data) {
@@ -196,6 +202,15 @@ const store = new Vuex.Store({
         },
         setWebDockerName(state, data) {
             state.webDockerName = data
+        },
+        setDriverUrl(state, data) {
+            state.driverUrl = data
+        },
+        setSessionId(state, data) {
+            state.sessionId = data
+        },
+        setWebXpath(state, data) {
+            state.webXpath = data
         }
     },
     modules: {},

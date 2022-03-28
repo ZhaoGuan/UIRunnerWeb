@@ -18,16 +18,18 @@
           <el-button size="mini" type="success" :disabled="selected===null" @click="connectWebDocker">连接
           </el-button>
           <el-button size="mini" type="danger" :disabled="selected===null" icon="el-icon-delete" @click="doStopDocker"/>
+          <el-button size="mini" type="success" :disabled="selected===null" @click="doRecording">获取页面布局</el-button>
+          <el-button size="mini" type="danger" :disabled="selected===null" @click="doStopRecording">关闭页面布局</el-button>
         </el-col>
       </el-card>
     </el-row>
     <el-row>
-      <el-col :span="12">
+      <el-col :span="16">
         <el-card shadow="never">
           <vncView ref="vncView" style="height: 84vh"/>
         </el-card>
       </el-col>
-      <el-col :span="12">
+      <el-col :span="8">
         <el-tabs type="border-card" style="height: 89vh;overflow: auto;">
           <el-tab-pane label="用例动作">
             <WebUICase ref="WebUICase"/>
@@ -44,6 +46,7 @@ import {getChromeList, createChrome, stopChrome, getDriver} from "@/api/ui"
 import {message} from "@/utils/tools";
 import WebUICase from "@/views/Web/WebUICase"
 import {Python} from "@/utils/doPython";
+import {io} from "socket.io-client"
 
 export default {
   name: "Web",
@@ -55,7 +58,7 @@ export default {
       chromeData: null,
       driverData: null,
       python: Python,
-      sideex: null
+      socket: null
     }
   },
   watch: {
@@ -63,7 +66,6 @@ export default {
       console.log(event)
     },
     selected: function (event) {
-      console.log(event)
       this.$store.commit("setWebDockerName", event)
     }
   },
@@ -78,12 +80,18 @@ export default {
     }
   },
   created() {
-    this.sideex = new SideeX()
+    this.socketConnect()
     if (this.python.pyshell.wsOpen) {
       this.python.pyshell.ws.close()
     }
     this.$store.commit("setDeviceType", "web")
+    this.$store.commit("setIsUseFullXpath", true)
     this.doGetChromeList()
+  },
+  destroyed() {
+    if (this.socket !== null) {
+      this.socket.disconnect()
+    }
   },
   mounted() {
   },
@@ -122,9 +130,31 @@ export default {
           this.driverData = res.data
           this.python.initPythonWebSocket()
           setTimeout(() => this.python.runPython(this.python.webDriverConnect(this.driverData.url, this.driverData.sessionId)), 2000)
+          this.$store.commit("setDriverUrl", this.driverData.url)
+          this.$store.commit("setSessionId", this.driverData.sessionId)
         }
       })
     },
+    socketConnect() {
+      this.socket = io("http://0.0.0.0:8888")
+      this.socket.on("connect", () => {
+        console.log("SocketIO Connect")
+      });
+      this.socket.on("recording", (data) => {
+        this.$store.commit("setSelectedElementXpath", data.xpath)
+        console.log(data)
+      })
+      this.socket.on("disconnect", (reason) => {
+        console.log(reason)
+      });
+    },
+    doRecording() {
+      this.python.recording(this.$store.getters.getWebDockerName)
+
+    },
+    doStopRecording() {
+      this.python.stopRecording()
+    }
   }
 }
 </script>

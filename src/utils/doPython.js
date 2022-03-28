@@ -286,13 +286,42 @@ Python.webDriverConnect = function (driverUrl, sessionId) {
     ]
     this.pyshell.base = true
     codeLines = codeLines.join("\n") + "\n";
-    console.log(codeLines)
     return codeLines
 }
 Python.getUrl = function (url, dockerName) {
     let codeLines = [
         `action.web_get_url("${url}")`,
         `driver.execute_script('return localStorage.setItem("dockerName","${dockerName}")')`
+    ]
+    codeLines = codeLines.join("\n") + "\n";
+    this.runPython(codeLines)
+}
+
+Python.recording = function (dockerName) {
+    let codeLines = [
+        `driver.execute_script('return localStorage.setItem("dockerName","${dockerName}")')`,
+        `driver.execute_script('return localStorage.setItem("recording","true")')`
+    ]
+    codeLines = codeLines.join("\n") + "\n";
+    this.runPython(codeLines)
+}
+Python.stopRecording = function () {
+    let codeLines = [
+        `driver.execute_script('return localStorage.setItem("recording","false")')`
+    ]
+    codeLines = codeLines.join("\n") + "\n";
+    this.runPython(codeLines)
+}
+
+Python.doWebFuncTest = function (value) {
+    const func = value.TYPE
+    let params = ''
+    for (const key in value.DATA) {
+        params += `${key}='${value.DATA[key]}',`
+    }
+    let codeLines = [
+        `driver.execute_script('return localStorage.setItem("recording","false")')`,
+        `action.${func}(${params})`
     ]
     codeLines = codeLines.join("\n") + "\n";
     this.runPython(codeLines)

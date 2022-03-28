@@ -1,5 +1,12 @@
 <template>
   <div style="overflow: auto">
+    <div style="color: black;text-align: left"><code>元素定位:</code></div>
+    <el-input size="mini" v-model="elementXpath"></el-input>
+    <el-row>
+      <el-col :span="4">
+        <el-button size="mini" type="info" style="text-align: left" @click="saveXpath()">保存自定义Xpath</el-button>
+      </el-col>
+    </el-row>
     <el-collapse>
       <el-collapse-item title="基础设置">
         <el-form :model="template" :rules="rules" ref="templateForm">
@@ -24,7 +31,6 @@
       <el-collapse-item title="弹窗关闭">
         <el-col :span="14">
           <el-input size="mini" v-model="alertCloseName" placeholder="弹窗操作名称"></el-input>
-          <el-input size="mini" v-model="alertElementLocation" placeholder="定位Xpath"></el-input>
         </el-col>
         <el-col :span="10">
           <el-select size="mini" v-model="alertCloseAction">
@@ -66,19 +72,19 @@
         <el-col :span="4">
           <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
         </el-col>
-        <!--        <el-col :span="4">-->
-        <!--          <el-popover-->
-        <!--              placement="top-start"-->
-        <!--              title="规则"-->
-        <!--              :width="50"-->
-        <!--              trigger="hover"-->
-        <!--              content='如果保存了自定义路径则会使用自定义路径'-->
-        <!--          >-->
-        <!--            <template #reference>-->
-        <!--              <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>-->
-        <!--            </template>-->
-        <!--          </el-popover>-->
-        <!--        </el-col>-->
+        <el-col :span="4">
+          <el-popover
+              placement="top-start"
+              title="规则"
+              :width="50"
+              trigger="hover"
+              content='如果保存了自定义路径则会使用自定义路径'
+          >
+            <template #reference>
+              <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>
+            </template>
+          </el-popover>
+        </el-col>
         <!--        <el-col :span="4">-->
         <!--          <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>-->
         <!--        </el-col>-->
@@ -167,11 +173,8 @@ export default {
   components: {funcDialog, ScreenTool,},
   data() {
     return {
-      platform: this.$store.getters.getPlatform.toUpperCase(),
-      deviceName: this.$store.getters.getSerial,
       actionList: this.$store.getters.getActionList,
       alertCloseName: null,
-      alertElementLocation: null,
       alertCloseAction: "click",
       alertCloseActionOptions: [
         {label: "点击", value: "click"},
@@ -185,6 +188,8 @@ export default {
         'DESIRED_CAPS':
             {
               'URL': null,
+              'SESSION_ID': null,
+              'DRIVER_URL': null
             },
         'ALERT_CLOSE_ELEMENTS': [],
         'ORIENTATION': null,
@@ -205,7 +210,8 @@ export default {
       python: Python,
       debugTaskId: null,
       debugTaskTimer: null,
-      debugTaskResult: null
+      debugTaskResult: null,
+      elementXpath: null
     }
   },
   created() {
@@ -218,14 +224,11 @@ export default {
     }
   },
   watch: {
-    '$store.state.platform': function () {
-      this.platform = this.$store.getters.getPlatform.toUpperCase()
-    },
-    '$store.state.serial': function () {
-      this.deviceName = this.$store.getters.getSerial
-    },
     '$store.state.actionList': function () {
       this.actionList = this.$store.getters.getActionList
+    },
+    '$store.state.selectedElementXpath': function () {
+      this.elementXpath = this.$store.getters.getSelectedElementXpath
     },
   },
   computed: {
@@ -240,7 +243,6 @@ export default {
   methods: {
     getUrl() {
       if (this.template.DESIRED_CAPS.URL) {
-        console.log(this.$store.getters.getWebDockerName)
         this.python.getUrl(this.template.DESIRED_CAPS.URL, this.$store.getters.getWebDockerName)
       }
     },
@@ -253,7 +255,7 @@ export default {
       this.$refs.funcDialog.openDialog()
     },
     addAlertClose() {
-      const element = this.alertElementLocation
+      const element = this.elementXpath
       if (element === null) {
         return
       }
@@ -273,11 +275,8 @@ export default {
       this.$store.commit("setSaveAlertClose", JSON.stringify(this.alertCloseList))
     },
     addElementClick() {
-      let element = this.$store.getters.getCustomizeLocation
-      if (this.$store.getters.getCustomizeLocation === null) {
-        element = this.$store.getters.getSelectedElement
-      }
-      if (element === null) {
+      let element = this.elementXpath
+      if (element === null && element === "") {
         return
       }
       const actionList = this.$store.getters.getActionList
@@ -306,7 +305,7 @@ export default {
       this.debugTaskResult = null
     },
     funcTest(data) {
-      this.python.doFuncTest(data)
+      this.python.doWebFuncTest(data)
     },
     editAction(data) {
       this.$refs.funcDialog.updateDialog(data)
@@ -355,16 +354,12 @@ export default {
       this.template = {
         'TITLE': null,
         'DESCRIPTION': null,
-        'TYPE': this.platform,
+        'TYPE': "WEB",
         'DESIRED_CAPS':
             {
               'URL': '',
-              'appPackage': "com.yiding.jianhuo",
-              'appActivity': 'com.yiding.jianhuo.SplashActivity',
-              'deviceName': null,
-              'passWord': 888888,
-              'performance': false,
-              'perfHost': "ip",
+              'SESSION_ID': null,
+              'DRIVER_URL': null
             },
         'ORIENTATION': null,
         'ALERT_CLOSE_ELEMENTS': [],
@@ -388,8 +383,9 @@ export default {
         message("没有操作步骤", "请填加操作步骤！")
         return false
       }
+      caseResult.DESIRED_CAPS.SESSION_ID = this.$store.getters.getSessionId
+      caseResult.DESIRED_CAPS.DRIVER_URL = this.$store.getters.getDriverUrl
       caseResult.ACTIONS = actionList
-      caseResult.TYPE = this.platform
       const alertCloseList = []
       for (const index in this.$store.getters.getAlertClose) {
         alertCloseList.push({
@@ -398,7 +394,6 @@ export default {
         })
       }
       caseResult.ALERT_CLOSE_ELEMENTS = alertCloseList
-      caseResult.DESIRED_CAPS.deviceName = this.deviceName
       return caseResult
     },
     yamlCase() {
@@ -465,6 +460,11 @@ export default {
         }
       }
       reader.readAsText(f.raw)
+    },
+    saveXpath() {
+      this.$store.commit("setSelectedElementXpath", this.elementXpath)
+      message("保存自定义路径成功!")
+
     }
   }
 }

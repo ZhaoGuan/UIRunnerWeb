@@ -19,6 +19,7 @@
     "element-ui": "^2.4.5",
     "flatted": "^2.0.2",
     "js-yaml": "^3.14.1",
+    "socket.io-client": "^4.4.1",
     "vue": "^2.6.11",
     "vue-deferred": "^1.0.2",
     "vue-router": "^3.2.0",
