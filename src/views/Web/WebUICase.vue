@@ -1,7 +1,7 @@
 <template>
   <div style="overflow: auto">
     <div style="color: black;text-align: left"><code>元素定位:</code></div>
-    <el-input size="mini" v-model="elementXpath"></el-input>
+    <el-input size="mini" v-model="elementXpath" clearable></el-input>
     <el-row>
       <el-button size="mini" type="info" style="text-align: left" @click="saveXpath()">保存自定义Xpath</el-button>
       <el-button size="mini" type="warning" style="text-align: left" @click="testXpath()">Xpath测试</el-button>
@@ -68,35 +68,19 @@
       </el-collapse-item>
       <el-collapse-item title="动作列表">
         <funcDialog ref="funcDialog"/>
-        <el-col :span="4">
+        <el-row>
           <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
-        </el-col>
-        <el-col :span="4">
-          <el-popover
-              placement="top-start"
-              title="规则"
-              :width="50"
-              trigger="hover"
-              content='如果保存了自定义路径则会使用自定义路径'
-          >
-            <template #reference>
-              <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>
-            </template>
-          </el-popover>
-        </el-col>
-        <!--        <el-col :span="4">-->
-        <!--          <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>-->
-        <!--        </el-col>-->
-        <!--        <el-col :span="4">-->
-        <!--          <el-button type="success" :disabled="$store.getters.getSwipePoint===null" size="mini" @click="addSwipe">获取页面滑动-->
-        <!--          </el-button>-->
-        <!--        </el-col>-->
-        <el-col :span="4">
+          <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>
+          <!--        <el-col :span="4">-->
+          <!--          <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>-->
+          <!--        </el-col>-->
+          <!--        <el-col :span="4">-->
+          <!--          <el-button type="success" :disabled="$store.getters.getSwipePoint===null" size="mini" @click="addSwipe">获取页面滑动-->
+          <!--          </el-button>-->
+          <!--        </el-col>-->
           <el-button :disabled="show" type="success" size="mini" @click="$refs.ScreenTool.openDialog()">图像识别</el-button>
-        </el-col>
-        <el-col :span="4">
           <el-button type="danger" size="mini" @click="clearActionList">清空动作</el-button>
-        </el-col>
+        </el-row>
         <ScreenTool ref="ScreenTool" device-type="web"/>
         <el-table
             :data="actionList"
@@ -251,6 +235,9 @@ export default {
       this.python.startApp(appPackage, appActivity)
     },
     openDialog() {
+      if (this.elementXpath === null || this.elementXpath === "") {
+        return
+      }
       this.$refs.funcDialog.openDialog()
     },
     addAlertClose() {
@@ -275,7 +262,7 @@ export default {
     },
     addElementClick() {
       let element = this.elementXpath
-      if (element === null && element === "") {
+      if (element === null || element === "") {
         return
       }
       const actionList = this.$store.getters.getActionList
