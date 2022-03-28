@@ -1,4 +1,5 @@
 import {alertMessage, message} from "@/utils/tools";
+import store from "@/store";
 
 export const Python = {}
 
@@ -67,7 +68,7 @@ Python.initPythonWebSocket = function () {
         const data = JSON.parse(messageData.data)
         this.pyshell.running = false
         console.log("Python Run", data)
-        if (data.status === "SUCCESS") {
+        if (data.status === "SUCCESS" && store.getters.getDeviceType !== "web") {
             message("操作执行成功", "请等待页面刷新!")
             this.callBack()
         }
@@ -282,6 +283,7 @@ Python.webDriverConnect = function (driverUrl, sessionId) {
         "from common.remote_driver import session_driver",
         "from web.selenium_customize_action import WebCustomize",
         `driver = session_driver("${driverUrl}","${sessionId}")`,
+        "driver.maximize_window()",
         "action = WebCustomize(driver)",
     ]
     this.pyshell.base = true
@@ -299,15 +301,21 @@ Python.getUrl = function (url, dockerName) {
 
 Python.recording = function (dockerName) {
     let codeLines = [
-        `driver.execute_script('return localStorage.setItem("dockerName","${dockerName}")')`,
-        `driver.execute_script('return localStorage.setItem("recording","true")')`
+        "try:",
+        `   driver.execute_script('return localStorage.setItem("dockerName","${dockerName}")')`,
+        `   driver.execute_script('return localStorage.setItem("recording","true")')`,
+        "except:",
+        "   pass",
     ]
     codeLines = codeLines.join("\n") + "\n";
     this.runPython(codeLines)
 }
 Python.stopRecording = function () {
     let codeLines = [
-        `driver.execute_script('return localStorage.setItem("recording","false")')`
+        "try:",
+        `   driver.execute_script('return localStorage.setItem("recording","false")')`,
+        "except:",
+        "   pass",
     ]
     codeLines = codeLines.join("\n") + "\n";
     this.runPython(codeLines)
@@ -320,7 +328,10 @@ Python.doWebFuncTest = function (value) {
         params += `${key}='${value.DATA[key]}',`
     }
     let codeLines = [
-        `driver.execute_script('return localStorage.setItem("recording","false")')`,
+        "try:",
+        `   driver.execute_script('return localStorage.setItem("recording","false")')`,
+        "except:",
+        "   pass",
         `action.${func}(${params})`
     ]
     codeLines = codeLines.join("\n") + "\n";

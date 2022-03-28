@@ -3,9 +3,8 @@
     <div style="color: black;text-align: left"><code>元素定位:</code></div>
     <el-input size="mini" v-model="elementXpath"></el-input>
     <el-row>
-      <el-col :span="4">
-        <el-button size="mini" type="info" style="text-align: left" @click="saveXpath()">保存自定义Xpath</el-button>
-      </el-col>
+      <el-button size="mini" type="info" style="text-align: left" @click="saveXpath()">保存自定义Xpath</el-button>
+      <el-button size="mini" type="warning" style="text-align: left" @click="testXpath()">Xpath测试</el-button>
     </el-row>
     <el-collapse>
       <el-collapse-item title="基础设置">
@@ -29,10 +28,10 @@
         </el-form>
       </el-collapse-item>
       <el-collapse-item title="弹窗关闭">
-        <el-col :span="14">
+        <el-row>
           <el-input size="mini" v-model="alertCloseName" placeholder="弹窗操作名称"></el-input>
-        </el-col>
-        <el-col :span="10">
+        </el-row>
+        <el-row>
           <el-select size="mini" v-model="alertCloseAction">
             <el-option
                 v-for="item in alertCloseActionOptions"
@@ -42,7 +41,7 @@
             </el-option>
           </el-select>
           <el-button type="success" size="mini" @click="addAlertClose">添加Alert关闭元素</el-button>
-        </el-col>
+        </el-row>
         <el-table :data="alertCloseList">
           <el-table-column
               prop="name"
@@ -398,7 +397,8 @@ export default {
     },
     yamlCase() {
       const caseResult = this.getCase()
-      console.log(caseResult)
+      caseResult.DESIRED_CAPS.DRIVER_URL = null
+      caseResult.DESIRED_CAPS.SESSION_ID = null
       if (!caseResult) {
         return
       }
@@ -443,6 +443,7 @@ export default {
           if (response.code === 20000 && response.data.status === "SUCCESS") {
             this.debugTaskResult = response.data.result
             this.debugTaskId = null
+            message("用例执行结束请查看结果!")
           }
         })
       }
@@ -465,6 +466,13 @@ export default {
       this.$store.commit("setSelectedElementXpath", this.elementXpath)
       message("保存自定义路径成功!")
 
+    },
+    testXpath() {
+      this.python.doWebFuncTest({
+        'NAME': "定位测试",
+        'TYPE': "find_element",
+        'DATA': {"location": this.elementXpath}
+      })
     }
   }
 }

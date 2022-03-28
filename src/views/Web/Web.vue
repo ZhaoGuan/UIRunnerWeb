@@ -18,8 +18,8 @@
           <el-button size="mini" type="success" :disabled="selected===null" @click="connectWebDocker">连接
           </el-button>
           <el-button size="mini" type="danger" :disabled="selected===null" icon="el-icon-delete" @click="doStopDocker"/>
-          <el-button size="mini" type="success" :disabled="selected===null" @click="doRecording">获取页面布局</el-button>
-          <el-button size="mini" type="danger" :disabled="selected===null" @click="doStopRecording">关闭页面布局</el-button>
+          <el-button size="mini" type="success" :disabled="!python.pyshell.base" @click="doRecording">获取页面布局</el-button>
+          <el-button size="mini" type="danger" :disabled="!python.pyshell.base" @click="doStopRecording">关闭页面布局</el-button>
         </el-col>
       </el-card>
     </el-row>
