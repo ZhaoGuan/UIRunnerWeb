@@ -19,6 +19,7 @@ export default {
       show: false,
       IsClean: false, //是否已断开并不可重新连接
       connectNum: 0, //重连次数
+      token: null
     };
   },
   watch: {},
@@ -29,12 +30,13 @@ export default {
   methods: {
     // vnc连接断开的回调函数
     disconnectedFromServer(msg) {
-      if (msg.detail.clean) {
+      if (msg.detail.clean && this.show) {
         // 根据 断开信息的msg.detail.clean 来判断是否可以重新连接
         this.connectVnc();
       } else {
         if (this.show) {
           alertMessage("连接失败", "请重新启动Chrome容器!")
+          this.rfb = null
           this.show = false
         }
         //这里做不可重新连接的一些操作
@@ -50,18 +52,24 @@ export default {
     },
     //连接vnc的函数
     connectVnc(token) {
+      if (token) {
+        this.token = token
+      }
+      if (this.rfb !== null) {
+        this.rfb.disconnect()
+        this.show = false
+      }
       this.show = true
       // 密码是通用的
       this.$nextTick(() => {
         const PASSWORD = "secret";
-        // eslint-disable-next-line no-unused-vars
         let vncUrl
         switch (process.env.NODE_ENV) {
           case 'development':
-            vncUrl = `${devEnv.baseVncWsUrl}?token=${token}`;
+            vncUrl = `${devEnv.baseVncWsUrl}?token=${this.token}`;
             break;
           case 'production':
-            vncUrl = `${proEnv.baseVncWsUrl}?token=${token}`; //打包完路径
+            vncUrl = `${proEnv.baseVncWsUrl}?token=${this.token}`; //打包完路径
             break;
         }
         let rfb = new RFB(document.getElementById("screen"), vncUrl, {
@@ -74,6 +82,11 @@ export default {
         rfb.resizeSession = true; //是一个boolean指示是否每当容器改变尺寸应被发送到调整远程会话的请求。默认情况下禁用
         this.rfb = rfb;
       })
+    },
+    disconnectVnc() {
+      this.rfb.disconnect()
+      this.show = false
+      this.rfb = null
     },
     vncPaste() {
       document.body.addEventListener(

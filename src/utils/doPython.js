@@ -79,6 +79,7 @@ Python.initPythonWebSocket = function () {
     ws.onclose = () => {
         this.pyshell.wsOpen = false
         this.pyshell.running = false
+        this.pyshell.base = false
         console.log("websocket closed")
     }
 }
@@ -126,12 +127,12 @@ Python.runPython = function (code) {
         console.log(code)
         message("已执行", "请等待结果!")
         return new Promise((resolve) => {
-            this.pyshell.running = true
             this.pyshell.ws.send(JSON.stringify({method: "input", value: code}))
             resolve()
-        }).then()
+        }).then(() => {
+            this.pyshell.running = true
+        })
     }
-
 }
 Python.doUnlock = function () {
     const code = `d.unlock()`

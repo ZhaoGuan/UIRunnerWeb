@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="添加动作" :visible.sync="funcDialog" @close="clearDialog">
+  <el-dialog :title="title" :visible.sync="funcDialog" @close="clearDialog">
     <el-form label-width="150px">
       <el-form-item label="动作名称">
         <el-input v-model.trim="actionName" size="mini">动作名称</el-input>
@@ -23,10 +23,11 @@
         </el-input>
       </el-form-item>
       <el-form-item v-for="(key) in funcData.params" v-bind:key="key" :label="key">
-        <el-switch v-if="key.substring(0,3)==='is_'" size="mini" v-model="funcParams[key]" active-text="false"
-                   inactive-text="true"/>
+        <el-switch v-if="key.substring(0,3)==='is_'" size="mini" v-model="funcParams[key]"
+                   active-text="True" inactive-text="False"/>
         <fucSelect v-else-if="key==='func'" ref="fucSelect"/>
-        <el-input v-else-if="key==='location'" size="mini" v-model="elementLocation"></el-input>
+        <el-input v-else-if="key==='location' && isCreate" size="mini" v-model="elementLocation"></el-input>
+        <el-input v-else-if="key==='location' && !isCreate" size="mini" v-model="editLocation"></el-input>
         <el-input v-else-if="key==='params'" size="mini" :disabled="true" value="参数为所选方法参数"></el-input>
         <el-input v-else size="mini" v-model="funcParams[key]"></el-input>
       </el-form-item>
@@ -47,12 +48,16 @@ export default {
   components: {fucSelect},
   data() {
     return {
+      title: null,
       useCustomizeLocation: false,
       funcDialog: false,
       func: null,
       funcParams: {},
       actionName: null,
       isAdd: true,
+      isCreate: true,
+      actionIndex: null,
+      editLocation: null
     }
   },
   created() {
@@ -98,17 +103,35 @@ export default {
   },
   methods: {
     openDialog() {
+      this.title = "添加动作"
       this.funcDialog = true
+      this.isCreate = true
     },
-    updateDialog(data) {
+    updateDialog(data, actionIndex) {
+      this.title = "修改动作"
+      this.actionIndex = actionIndex
+      this.isCreate = false
       this.funcDialog = true
       this.isAdd = false
-      this.actionName = data.NAME
-      this.func = data.TYPE
-      this.funcParams = data.DATA
+      const temp = Object.assign({}, data)
+      this.actionName = temp.NAME
+      this.func = temp.TYPE
+      this.funcParams = temp.DATA
+      if (Object.keys(this.funcParams).includes("location")) {
+        this.editLocation = data.DATA.location
+      }
+      this.$nextTick(() => {
+        if (Object.keys(this.funcParams).includes("func")) {
+          this.editLocation = data.DATA.params.location
+          this.$refs.fucSelect[0].updateDialog(this.funcParams, false)
+        }
+      })
     },
     closeDialog() {
       this.funcDialog = false
+      this.isCreate = true
+      this.actionIndex = null
+      this.editLocation = null
     },
     clearDialog() {
       this.actionName = null
@@ -129,6 +152,12 @@ export default {
           this.funcParams.location = this.$store.getters.getSelectedElement
         }
       }
+      for (const i in this.funcData.params) {
+        const key = this.funcData.params[i]
+        if (key.substring(0, 3) === 'is_' && !Object.keys(this.funcParams).includes(key)) {
+          this.funcParams[key] = false
+        }
+      }
       const actionList = this.$store.getters.getActionList
       actionList.push({
         'NAME': this.actionName,
@@ -139,7 +168,15 @@ export default {
       this.closeDialog()
     },
     updateAction() {
-
+      const actionList = this.$store.getters.getActionList
+      actionList[this.actionIndex] = {
+        'NAME': this.actionName,
+        'TYPE': this.func,
+        'DATA': JSON.parse(JSON.stringify(this.funcParams))
+      }
+      console.log(actionList)
+      this.$store.commit("setActionList", actionList)
+      this.closeDialog()
     }
   }
 }

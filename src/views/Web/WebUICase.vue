@@ -1,7 +1,7 @@
 <template>
   <div style="overflow: auto">
     <div style="color: black;text-align: left"><code>元素定位:</code></div>
-    <el-input size="mini" v-model="elementXpath" clearable></el-input>
+    <el-input size="mini" v-model="elementXpath" clearable @change="clearXpath"></el-input>
     <el-row>
       <el-button size="mini" type="info" style="text-align: left" @click="saveXpath()">保存自定义Xpath</el-button>
       <el-button size="mini" type="warning" style="text-align: left" @click="testXpath()">Xpath测试</el-button>
@@ -96,18 +96,27 @@
           />
           <el-table-column label="操作" width="250">
             <template slot-scope="scope">
-              <el-button size="mini" icon="el-icon-arrow-up"
-                         @click="actionUp(scope.row)">
-              </el-button>
-              <el-button size="mini" icon="el-icon-arrow-down"
-                         @click="actionDown(scope.row)">
-              </el-button>
-              <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
-              <!--            <el-button size="mini" type="success"-->
-              <!--                       @click="editAction(scope.row)">EDIT-->
-              <!--            </el-button>-->
-              <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
+              <el-row type="flex" justify="center">
+                <el-col :span="12" style="text-align:center">
+                  <el-button size="mini" icon="el-icon-arrow-up"
+                             @click="actionUp(scope.row)">
+                  </el-button>
+                </el-col>
+                <el-col :span="12" style="text-align:center">
+                  <el-button size="mini" icon="el-icon-arrow-down"
+                             @click="actionDown(scope.row)">
+                  </el-button>
+                </el-col>
+              </el-row>
+              <el-row style="text-align:center">
+                <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
+                <el-button size="mini" type="success"
+                           @click="editAction(scope.row,scope.row.index)">修改
+                </el-button>
+                <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
+              </el-row>
             </template>
+
           </el-table-column>
         </el-table>
         <el-row>
@@ -235,14 +244,14 @@ export default {
       this.python.startApp(appPackage, appActivity)
     },
     openDialog() {
-      if (this.elementXpath === null || this.elementXpath === "") {
+      if (this.$store.getters.getSelectedElementXpath === null || this.$store.getters.getSelectedElementXpath === "") {
         return
       }
       this.$refs.funcDialog.openDialog()
     },
     addAlertClose() {
       const element = this.elementXpath
-      if (element === null) {
+      if (this.$store.getters.getSelectedElementXpath === null || this.$store.getters.getSelectedElementXpath === "") {
         return
       }
       const alertCloseList = this.$store.getters.getAlertClose
@@ -293,8 +302,8 @@ export default {
     funcTest(data) {
       this.python.doWebFuncTest(data)
     },
-    editAction(data) {
-      this.$refs.funcDialog.updateDialog(data)
+    editAction(data,index) {
+      this.$refs.funcDialog.updateDialog(data,index)
     },
     deleteAction(data) {
       this.actionList.splice(this.actionList.indexOf(data), 1)
@@ -452,7 +461,11 @@ export default {
     saveXpath() {
       this.$store.commit("setSelectedElementXpath", this.elementXpath)
       message("保存自定义路径成功!")
-
+    },
+    clearXpath(event) {
+      if (event === "" || event === null) {
+        this.$store.commit("setSelectedElementXpath", event)
+      }
     },
     testXpath() {
       this.python.doWebFuncTest({

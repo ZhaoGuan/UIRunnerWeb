@@ -142,9 +142,9 @@
                        @click="actionDown(scope.row)">
             </el-button>
             <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
-            <!--            <el-button size="mini" type="success"-->
-            <!--                       @click="editAction(scope.row)">EDIT-->
-            <!--            </el-button>-->
+<!--            <el-button size="mini" type="success"-->
+<!--                       @click="editAction(scope.row,scope.row.index)">EDIT-->
+<!--            </el-button>-->
             <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -344,8 +344,8 @@ export default {
     funcTest(data) {
       this.python.doFuncTest(data)
     },
-    editAction(data) {
-      this.$refs.funcDialog.updateDialog(data)
+    editAction(data, index) {
+      this.$refs.funcDialog.updateDialog(data, index)
     },
     deleteAction(data) {
       this.actionList.splice(this.actionList.indexOf(data), 1)

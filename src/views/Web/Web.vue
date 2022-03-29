@@ -19,17 +19,18 @@
           </el-button>
           <el-button size="mini" type="danger" :disabled="selected===null" icon="el-icon-delete" @click="doStopDocker"/>
           <el-button size="mini" type="success" :disabled="!python.pyshell.base" @click="doRecording">获取页面布局</el-button>
-          <el-button size="mini" type="danger" :disabled="!python.pyshell.base" @click="doStopRecording">关闭页面布局</el-button>
+          <el-button size="mini" type="danger" :disabled="!python.pyshell.base" @click="doStopRecording">关闭页面布局
+          </el-button>
         </el-col>
       </el-card>
     </el-row>
     <el-row>
-      <el-col :span="16">
+      <el-col :span="15">
         <el-card shadow="never">
           <vncView ref="vncView" style="height: 84vh"/>
         </el-card>
       </el-col>
-      <el-col :span="8">
+      <el-col :span="9">
         <el-tabs type="border-card" style="height: 89vh;overflow: auto;">
           <el-tab-pane label="用例动作">
             <WebUICase ref="WebUICase"/>
@@ -114,6 +115,7 @@ export default {
       })
     },
     doStopDocker() {
+      this.$refs.vncView.disconnectVnc()
       stopChrome({dockerName: this.selected}).then(res => {
         if (res.code === 20000) {
           this.$refs.vncView.show = false
@@ -124,14 +126,20 @@ export default {
       })
     },
     connectWebDocker() {
-      this.$refs.vncView.connectVnc(this.chromeMapping[this.selected].token)
       getDriver(this.selected).then(res => {
         if (res.code === 20000) {
+          const token = this.chromeMapping[this.selected].token
+          // this.$refs.vncView.token = token
+          this.$refs.vncView.connectVnc(token)
           this.driverData = res.data
           this.python.initPythonWebSocket()
           setTimeout(() => this.python.runPython(this.python.webDriverConnect(this.driverData.url, this.driverData.sessionId)), 2000)
           this.$store.commit("setDriverUrl", this.driverData.url)
           this.$store.commit("setSessionId", this.driverData.sessionId)
+        } else {
+          console.log("!!!!!!!")
+          this.selected = null
+          this.chromeList = []
         }
       })
     },
