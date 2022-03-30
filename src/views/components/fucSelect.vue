@@ -14,10 +14,9 @@
       </el-input>
     </el-form-item>
     <el-form-item v-for="(key) in funcData.params" v-bind:key="key" :label="key">
-      <el-switch v-if="key.substring(0,3)==='is_'" v-model.trim="funcParams[key]" active-text="true"
-                 inactive-text="false"/>
-      <el-input v-else-if="key==='location'" size="mine"
-                v-model="elementLocation"></el-input>
+      <el-switch v-if="key.substring(0,3)==='is_'" v-model="funcParams[key]" active-text="True" inactive-text="False"/>
+      <el-input v-else-if="key==='location'&&isCreate" size="mine" v-model="elementLocation"></el-input>
+      <el-input v-else-if="key==='location'&&!isCreate" size="mine" v-model="editLocation"></el-input>
       <el-input v-else size="mini" v-model.trim="funcParams[key]"></el-input>
     </el-form-item>
   </el-form>
@@ -30,14 +29,16 @@ export default {
     return {
       funcDialog: false,
       func: null,
+      isCreate: true,
       funcParams: {},
       actionName: null,
       customizeLocation: false,
-      useCustomizeLocation: null
+      useCustomizeLocation: null,
+      editLocation: null
     }
-  }, watch: {
-  }
-  , computed: {
+  },
+  watch: {},
+  computed: {
     elementLocation() {
       if (this.useCustomizeLocation) {
         return this.customizeLocation
@@ -70,7 +71,8 @@ export default {
       }
       return map
     },
-  }, methods: {
+  },
+  methods: {
     clear() {
       this.func = null
       this.funcData = {
@@ -79,8 +81,15 @@ export default {
       }
       this.funcParams = null
     },
-    flash() {
-      this.$forceUpdate()
+    updateDialog(data, isCreate) {
+      const temp = Object.assign({}, data)
+      this.isCreate = isCreate
+      this.func = temp.func
+      this.funcParams = temp.params
+      if (Object.keys(this.funcParams).includes("location")) {
+        console.log(data.params.location)
+        this.editLocation = data.params.location
+      }
     },
     getFuncParams() {
       if (this.funcData.params.includes("location")) {
@@ -90,9 +99,14 @@ export default {
           this.funcParams.location = this.$store.getters.getSelectedElement
         }
       }
+      for (const i in this.funcData.params) {
+        const key = this.funcData.params[i]
+        if (key.substring(0, 3) === 'is_' && !Object.keys(this.funcParams).includes(key)) {
+          this.funcParams[key] = false
+        }
+      }
       return this.funcParams
     }
-
   }
 }
 </script>

@@ -1,15 +1,12 @@
 <template>
-  <div id="device">
-    <el-row>
-      <DeviceHeader ref="DeviceHeader" style="height: 8vh"/>
+  <div id="device" style="width: 100%">
+    <el-row style="height: 8vh">
+      <DeviceHeader ref="DeviceHeader"/>
     </el-row>
-    <el-row>
+    <el-row style="height: 90vh">
       <el-col :span="12">
-        <screen ref="screen" style="height: 90vh;"/>
+        <screen ref="screen" style="height: 100%"/>
       </el-col>
-      <!--      <el-col :span="7">-->
-      <!--        <nodeDetail ref="nodeDetail" class="device-detail"/>-->
-      <!--      </el-col>-->
       <el-col :span="12" class="device-detail">
         <el-tabs type="border-card">
           <el-tab-pane label="元素操作">
@@ -28,19 +25,26 @@
 </template>
 
 <script>
-import Screen from "@/views/screen";
-import hierarchyTree from "@/views/hierarchyTree";
-import nodeDetail from "@/views/nodeDetail"
-import DeviceHeader from "@/views/header"
-import UICase from "@/views/UICase"
+import {Python} from "@/utils/doPython";
+import Screen from "@/views/Mobile/screen";
+import hierarchyTree from "@/views/Mobile/hierarchyTree";
+import nodeDetail from "@/views/Mobile/nodeDetail"
+import DeviceHeader from "@/views/Mobile/header"
+import UICase from "@/views/Mobile/UICase"
+
 
 export default {
   name: "Device",
   components: {
     hierarchyTree, Screen, nodeDetail, DeviceHeader, UICase
   },
+  created() {
+    if (this.python.pyshell.wsOpen) {
+      this.python.pyshell.ws.close()
+    }
+    this.$store.commit("setDeviceType", "mobile")
+  },
   mounted() {
-    this.$store.dispatch("getFuncDocList")
   },
   data() {
     return {
@@ -48,6 +52,7 @@ export default {
       swipeEnd: {},
       cursor: null,
       nodeSelected: null,
+      python: Python,
     }
   },
   watch: {},
@@ -61,7 +66,7 @@ export default {
 }
 
 .device-detail {
-  height: 90vh;
-  overflow: scroll;
+  height: 100%;
+  overflow: auto;
 }
 </style>

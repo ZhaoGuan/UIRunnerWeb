@@ -57,3 +57,41 @@ export function getLocalDevices() {
     })
 }
 
+export function getChromeList() {
+    return request({
+        url: '/web-docker/all',
+        method: 'get',
+    })
+}
+
+export function createChrome() {
+    return request({
+        url: '/web-docker',
+        method: 'post',
+    })
+}
+
+export function stopChrome(body) {
+    return request({
+        url: '/web-docker',
+        method: 'delete',
+        data: body
+    })
+}
+
+export function getDriver(dockerName) {
+    return request({
+        url: '/web-docker-driver',
+        method: 'get',
+        params: {dockerName}
+    })
+}
+
+
+export function getDockerDriverScreen(dockerName) {
+    return request({
+        url: '/web-docker/screen',
+        method: 'get',
+        params: {dockerName}
+    })
+}

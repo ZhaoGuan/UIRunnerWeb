@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-import {hierarchy, screenshot, functionList} from "@/api/ui";
+import {hierarchy, screenshot, functionList, getDockerDriverScreen} from "@/api/ui";
 import {b64toBlob} from "@/utils/common"
 
 Vue.use(Vuex)
@@ -43,7 +43,12 @@ const store = new Vuex.Store({
         customizeLocation: null,
         saveAlertClose: localStorage.saveAlertClose || "",
         saveScreen: null,
-        swipePoint: null
+        swipePoint: null,
+        deviceType: null,
+        webDockerName: null,
+        sessionId: null,
+        driverUrl: null,
+        webXpath: null
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -84,7 +89,12 @@ const store = new Vuex.Store({
         getSaveAlertClose: state => state.saveAlertClose,
         getCustomizeLocation: state => state.customizeLocation,
         getSaveScreen: state => state.saveScreen,
-        getSwipePoint: state => state.swipePoint
+        getSwipePoint: state => state.swipePoint,
+        getDeviceType: state => state.deviceType,
+        getWebDockerName: state => state.webDockerName,
+        getDriverUrl: state => state.driverUrl,
+        getSessionId: state => state.sessionId,
+        getWebXpath: state => state.webXpath
     },
     mutations: {
         setDeviceUrl(state, data) {
@@ -186,6 +196,21 @@ const store = new Vuex.Store({
         },
         setSwipePoint(state, data) {
             state.swipePoint = data
+        },
+        setDeviceType(state, data) {
+            state.deviceType = data
+        },
+        setWebDockerName(state, data) {
+            state.webDockerName = data
+        },
+        setDriverUrl(state, data) {
+            state.driverUrl = data
+        },
+        setSessionId(state, data) {
+            state.sessionId = data
+        },
+        setWebXpath(state, data) {
+            state.webXpath = data
         }
     },
     modules: {},
@@ -194,14 +219,20 @@ const store = new Vuex.Store({
             commit("setLoading", true)
         },
         screenRefresh({commit}) {
-            if (!this.getters.getLiveScreen) {
+            if (this.state.deviceType === "mobile") {
                 commit("setLoading", true)
                 screenshot(this.getters.getDeviceId)
                     .then(function (ret) {
                         commit("setImgBlob", b64toBlob(ret.data.data, 'image/' + ret.data.type))
                         commit("setLoading", false)
                     })
+            } else {
+                console.log("WEB SCREEN")
+                getDockerDriverScreen(this.getters.getWebDockerName).then(res => {
+                    commit("setImgBlob", b64toBlob(res.data.data, 'image/' + res.data.type))
+                })
             }
+
         },
         hierarchyRefresh({commit}) {
             if (!this.getters.getLiveScreen) {
@@ -220,12 +251,14 @@ const store = new Vuex.Store({
             // return state.jsonHierarchy
         },
         RefreshHierarchyWithScreen({commit}) {
-            this.screenRefresh(commit)
+            if (!this.getters.getLiveScreen) {
+                this.screenRefresh(commit)
+            }
             this.hierarchyRefresh(commit)
             commit("setLoading", false)
         },
         getFuncDocList({commit}) {
-            functionList("mobil").then(response => {
+            functionList(this.state.deviceType).then(response => {
                 if (response.code === 20000) {
                     commit("setFuncDocList", response.data)
                 }

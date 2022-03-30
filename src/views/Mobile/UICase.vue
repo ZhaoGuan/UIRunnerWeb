@@ -8,7 +8,7 @@
         <el-form-item :size="formItemSize" label="用例描述" prop="DESCRIPTION">
           <el-input :size="formItemSize" v-model="template.DESCRIPTION"></el-input>
         </el-form-item>
-        <el-form-item v-if="platform==='ANDROID'" :size="formItemSize" label="设备密码" prop="DESIRED_CAPS.passWord">
+        <el-form-item :size="formItemSize" label="设备密码" prop="DESIRED_CAPS.passWord">
           <el-input :size="formItemSize" v-model="template.DESIRED_CAPS.passWord"></el-input>
         </el-form-item>
         <el-form-item :size="formItemSize" label="appPackage" prop="DESIRED_CAPS.appPackage">
@@ -32,7 +32,7 @@
           </el-popover>
         </el-form-item>
         <el-form-item>
-          <el-button :disabled="show" v-if="platform==='ANDROID'" type="success" :size="formItemSize"
+          <el-button :disabled="show" type="success" :size="formItemSize"
                      @click="unlockDevice">解锁设备
           </el-button>
           <el-button :disabled="show" type="success" :size="formItemSize" @click="startApp">启动应用</el-button>
@@ -90,7 +90,6 @@
       </el-table>
     </el-collapse-item>
     <el-collapse-item title="动作列表">
-      <funcDialog ref="funcDialog"/>
       <el-col :span="4">
         <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
       </el-col>
@@ -120,7 +119,7 @@
       <el-col :span="4">
         <el-button type="danger" size="mini" @click="clearActionList">清空动作</el-button>
       </el-col>
-      <ScreenTool ref="ScreenTool"/>
+      <ScreenTool ref="ScreenTool" device-type="mobile"/>
       <el-table
           :data="actionList"
           stripe
@@ -142,9 +141,9 @@
                        @click="actionDown(scope.row)">
             </el-button>
             <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
-            <!--            <el-button size="mini" type="success"-->
-            <!--                       @click="editAction(scope.row)">EDIT-->
-            <!--            </el-button>-->
+<!--            <el-button size="mini" type="success"-->
+<!--                       @click="editAction(scope.row,scope.$index)">EDIT-->
+<!--            </el-button>-->
             <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -178,13 +177,15 @@
           </el-table-column>
         </el-table>
       </div>
+
     </el-collapse-item>
+    <funcDialog ref="funcDialog"/>
   </el-collapse>
 </template>
 
 <script>
 import {Python} from "@/utils/doPython";
-import funcDialog from "./components/funcDialog"
+import funcDialog from "../components/funcDialog"
 import {message} from "@/utils/tools";
 import {caseTest, taskResult} from "@/api/ui";
 import ScreenTool from "@/views/components/screenTool"
@@ -270,7 +271,11 @@ export default {
   },
   methods: {
     unlockDevice() {
-      this.python.androidUnlock(this.template.DESIRED_CAPS.passWord)
+      if (this.platform === 'ANDROID') {
+        this.python.androidUnlock(this.template.DESIRED_CAPS.passWord)
+      } else {
+        this.python.iosUnlock(this.template.DESIRED_CAPS.passWord)
+      }
     },
     androidSetOrientation() {
       if (this.template.ORIENTATION) {
@@ -340,8 +345,8 @@ export default {
     funcTest(data) {
       this.python.doFuncTest(data)
     },
-    editAction(data) {
-      this.$refs.funcDialog.updateDialog(data)
+    editAction(data, index) {
+      this.$refs.funcDialog.updateDialog(data, index)
     },
     deleteAction(data) {
       this.actionList.splice(this.actionList.indexOf(data), 1)
