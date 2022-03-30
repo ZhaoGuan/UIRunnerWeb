@@ -81,7 +81,6 @@ export default {
     }
   },
   created() {
-    this.socketConnect()
     if (this.python.pyshell.wsOpen) {
       this.python.pyshell.ws.close()
     }
@@ -129,6 +128,10 @@ export default {
       getDriver(this.selected).then(res => {
         if (res.code === 20000) {
           const token = this.chromeMapping[this.selected].token
+          if (this.socket !== null) {
+            this.socket.disconnect()
+          }
+          this.socketConnect()
           // this.$refs.vncView.token = token
           this.$refs.vncView.connectVnc(token)
           this.driverData = res.data
@@ -145,10 +148,7 @@ export default {
     },
     socketConnect() {
       this.socket = io("http://0.0.0.0:8888")
-      this.socket.on("connect", () => {
-        console.log("SocketIO Connect")
-      });
-      this.socket.on("recording", (data) => {
+      this.socket.on(this.selected, (data) => {
         this.$store.commit("setSelectedElementXpath", data.xpath)
         console.log(data)
       })
@@ -158,7 +158,6 @@ export default {
     },
     doRecording() {
       this.python.recording(this.$store.getters.getWebDockerName)
-
     },
     doStopRecording() {
       this.python.stopRecording()
