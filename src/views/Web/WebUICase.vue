@@ -67,13 +67,10 @@
         </el-table>
       </el-collapse-item>
       <el-collapse-item title="动作列表">
-        <funcDialog ref="funcDialog"/>
         <el-row>
           <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
           <el-button type="success" size="mini" @click="addElementClick">元素点击</el-button>
-          <!--        <el-col :span="4">-->
-          <!--          <el-button type="success" size="mini" @click="addTap">坐标点击</el-button>-->
-          <!--        </el-col>-->
+          <el-button type="success" size="mini" @click="addMouseOver">鼠标悬停</el-button>
           <!--        <el-col :span="4">-->
           <!--          <el-button type="success" :disabled="$store.getters.getSwipePoint===null" size="mini" @click="addSwipe">获取页面滑动-->
           <!--          </el-button>-->
@@ -85,6 +82,7 @@
         <el-table
             :data="actionList"
             stripe
+            :key="Math.random()"
             style="width: 100%">
           <el-table-column
               prop="NAME"
@@ -111,12 +109,11 @@
               <el-row style="text-align:center">
                 <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
                 <el-button size="mini" type="success"
-                           @click="editAction(scope.row,scope.row.index)">修改
+                           @click="editAction(scope.row,scope.$index)">修改
                 </el-button>
                 <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
               </el-row>
             </template>
-
           </el-table-column>
         </el-table>
         <el-row>
@@ -150,6 +147,7 @@
         </div>
       </el-collapse-item>
     </el-collapse>
+    <funcDialog ref="funcDialog"/>
   </div>
 </template>
 
@@ -216,11 +214,19 @@ export default {
     }
   },
   watch: {
-    '$store.state.actionList': function () {
-      this.actionList = this.$store.getters.getActionList
+    '$store.state.actionList': {
+      handler: function () {
+        this.actionList = this.$store.getters.getActionList
+      },
+      immediate: true,
+      deep: true
     },
-    '$store.state.selectedElementXpath': function () {
-      this.elementXpath = this.$store.getters.getSelectedElementXpath
+    '$store.state.selectedElementXpath': {
+      handler: function () {
+        this.elementXpath = this.$store.getters.getSelectedElementXpath
+      },
+      immediate: true,
+      deep: true
     },
   },
   computed: {
@@ -230,7 +236,6 @@ export default {
     alertCloseList() {
       return this.$store.getters.getAlertClose
     }
-
   },
   methods: {
     getUrl() {
@@ -282,6 +287,20 @@ export default {
       })
       this.$store.commit("setActionList", actionList)
     },
+    addMouseOver() {
+      let element = this.elementXpath
+      if (element === null || element === "") {
+        return
+      }
+      const actionList = this.$store.getters.getActionList
+      actionList.push({
+        'NAME': "悬停元素:" + element,
+        'TYPE': "web_mouse_over",
+        'DATA': {"location": element}
+      })
+      this.$store.commit("setActionList", actionList)
+
+    },
     addTap() {
       const point = this.$store.getters.getTapPoint
       if (point === null) {
@@ -302,8 +321,9 @@ export default {
     funcTest(data) {
       this.python.doWebFuncTest(data)
     },
-    editAction(data,index) {
-      this.$refs.funcDialog.updateDialog(data,index)
+    editAction(data, index) {
+      console.log(this.$store.getters.getActionList)
+      this.$refs.funcDialog.updateDialog(data, index)
     },
     deleteAction(data) {
       this.actionList.splice(this.actionList.indexOf(data), 1)
@@ -466,6 +486,9 @@ export default {
       if (event === "" || event === null) {
         this.$store.commit("setSelectedElementXpath", event)
       }
+    },
+    updateActionList() {
+      this.actionList = this.$store.getters.getActionList
     },
     testXpath() {
       this.python.doWebFuncTest({

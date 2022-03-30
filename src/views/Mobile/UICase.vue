@@ -90,7 +90,6 @@
       </el-table>
     </el-collapse-item>
     <el-collapse-item title="动作列表">
-      <funcDialog ref="funcDialog"/>
       <el-col :span="4">
         <el-button type="success" size="mini" @click="openDialog">添加动作</el-button>
       </el-col>
@@ -143,7 +142,7 @@
             </el-button>
             <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
 <!--            <el-button size="mini" type="success"-->
-<!--                       @click="editAction(scope.row,scope.row.index)">EDIT-->
+<!--                       @click="editAction(scope.row,scope.$index)">EDIT-->
 <!--            </el-button>-->
             <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
           </template>
@@ -178,7 +177,9 @@
           </el-table-column>
         </el-table>
       </div>
+
     </el-collapse-item>
+    <funcDialog ref="funcDialog"/>
   </el-collapse>
 </template>
 

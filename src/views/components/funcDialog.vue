@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :title="title" :visible.sync="funcDialog" @close="clearDialog">
+  <el-dialog :title="title" :visible.sync="funcDialog" :close-on-click-modal="false" @close="clearDialog">
     <el-form label-width="150px">
       <el-form-item label="动作名称">
         <el-input v-model.trim="actionName" size="mini">动作名称</el-input>
@@ -169,12 +169,11 @@ export default {
     },
     updateAction() {
       const actionList = this.$store.getters.getActionList
-      actionList[this.actionIndex] = {
+      actionList.splice(this.actionIndex, 1, {
         'NAME': this.actionName,
         'TYPE': this.func,
         'DATA': JSON.parse(JSON.stringify(this.funcParams))
-      }
-      console.log(actionList)
+      })
       this.$store.commit("setActionList", actionList)
       this.closeDialog()
     }
