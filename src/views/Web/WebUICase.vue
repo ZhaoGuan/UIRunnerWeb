@@ -4,8 +4,8 @@
     <el-input size="mini" v-model="elementXpath" clearable @change="clearXpath"></el-input>
     <el-row style="color: black;;text-align: left">
       <el-col :span="4"><code>鼠标点击坐标:</code></el-col>
-      <el-col :span="4"><code>x: {{ elementLocation.x }}</code></el-col>
-      <el-col :span="4"><code>y: {{ elementLocation.y }}</code></el-col>
+      <el-col :span="10"><code>x: {{ elementLocation.x }}</code></el-col>
+      <el-col :span="10"><code>y: {{ elementLocation.y }}</code></el-col>
     </el-row>
     <el-row>
       <el-button size="mini" type="info" style="text-align: left" @click="saveXpath()">保存自定义Xpath</el-button>
