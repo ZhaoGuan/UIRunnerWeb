@@ -48,7 +48,8 @@ const store = new Vuex.Store({
         webDockerName: null,
         sessionId: null,
         driverUrl: null,
-        webXpath: null
+        webXpath: null,
+        webLocation: null
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -94,7 +95,8 @@ const store = new Vuex.Store({
         getWebDockerName: state => state.webDockerName,
         getDriverUrl: state => state.driverUrl,
         getSessionId: state => state.sessionId,
-        getWebXpath: state => state.webXpath
+        getWebXpath: state => state.webXpath,
+        getWebLocation: state => JSON.parse(state.webLocation)
     },
     mutations: {
         setDeviceUrl(state, data) {
@@ -211,6 +213,9 @@ const store = new Vuex.Store({
         },
         setWebXpath(state, data) {
             state.webXpath = data
+        },
+        setWebLocation(state, data) {
+            state.webLocation = data
         }
     },
     modules: {},

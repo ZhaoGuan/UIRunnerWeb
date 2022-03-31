@@ -87,7 +87,6 @@ export default {
       this.func = temp.func
       this.funcParams = temp.params
       if (Object.keys(this.funcParams).includes("location")) {
-        console.log(data.params.location)
         this.editLocation = data.params.location
       }
     },

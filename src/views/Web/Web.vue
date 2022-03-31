@@ -140,7 +140,6 @@ export default {
           this.$store.commit("setDriverUrl", this.driverData.url)
           this.$store.commit("setSessionId", this.driverData.sessionId)
         } else {
-          console.log("!!!!!!!")
           this.selected = null
           this.chromeList = []
         }
@@ -149,8 +148,9 @@ export default {
     socketConnect() {
       this.socket = io("http://0.0.0.0:8888")
       this.socket.on(this.selected, (data) => {
+        console.log(data.xpath)
         this.$store.commit("setSelectedElementXpath", data.xpath)
-        console.log(data)
+        this.$store.commit("setWebLocation", JSON.stringify(data.location))
       })
       this.socket.on("disconnect", (reason) => {
         console.log(reason)

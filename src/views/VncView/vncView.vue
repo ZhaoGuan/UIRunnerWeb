@@ -84,9 +84,11 @@ export default {
       })
     },
     disconnectVnc() {
-      this.rfb.disconnect()
-      this.show = false
-      this.rfb = null
+      if (this.rfb) {
+        this.rfb.disconnect()
+        this.show = false
+        this.rfb = null
+      }
     },
     vncPaste() {
       document.body.addEventListener(

@@ -2,6 +2,11 @@
   <div style="overflow: auto">
     <div style="color: black;text-align: left"><code>元素定位:</code></div>
     <el-input size="mini" v-model="elementXpath" clearable @change="clearXpath"></el-input>
+    <el-row style="color: black;;text-align: left">
+      <el-col :span="4"><code>鼠标点击坐标:</code></el-col>
+      <el-col :span="4"><code>x: {{ elementLocation.x }}</code></el-col>
+      <el-col :span="4"><code>y: {{ elementLocation.y }}</code></el-col>
+    </el-row>
     <el-row>
       <el-button size="mini" type="info" style="text-align: left" @click="saveXpath()">保存自定义Xpath</el-button>
       <el-button size="mini" type="warning" style="text-align: left" @click="testXpath()">Xpath测试</el-button>
@@ -120,6 +125,7 @@
           <el-button :disabled="show" type="success" size="mini" @click="yamlCase">生成YML用例
           </el-button>
           <el-button :disabled="show" type="danger" size="mini" @click="runCase">运行</el-button>
+          <el-button v-if="debugTaskResult" type="danger" size="mini" @click="debugTaskResult=null">清空结果数据</el-button>
         </el-row>
         <div v-if="debugTaskResult">
           <el-table
@@ -201,7 +207,11 @@ export default {
       debugTaskId: null,
       debugTaskTimer: null,
       debugTaskResult: null,
-      elementXpath: null
+      elementXpath: null,
+      elementLocation: {
+        x: null,
+        y: null
+      }
     }
   },
   created() {
@@ -224,6 +234,15 @@ export default {
     '$store.state.selectedElementXpath': {
       handler: function () {
         this.elementXpath = this.$store.getters.getSelectedElementXpath
+      },
+      immediate: true,
+      deep: true
+    },
+    '$store.state.webLocation': {
+      handler: function () {
+        if (this.$store.getters.getWebLocation) {
+          this.elementLocation = this.$store.getters.getWebLocation
+        }
       },
       immediate: true,
       deep: true
