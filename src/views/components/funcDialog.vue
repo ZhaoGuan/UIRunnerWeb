@@ -168,6 +168,20 @@ export default {
       this.closeDialog()
     },
     updateAction() {
+      if (this.funcData.params.includes("func")) {
+        const funcSelect = this.$refs["fucSelect"][0]
+        this.funcParams.func = funcSelect.func
+        this.funcParams.params = funcSelect.getFuncParams()
+      }
+      if (this.funcData.params.includes("location")) {
+        this.funcParams.location = this.editLocation
+      }
+      for (const i in this.funcData.params) {
+        const key = this.funcData.params[i]
+        if (key.substring(0, 3) === 'is_' && !Object.keys(this.funcParams).includes(key)) {
+          this.funcParams[key] = false
+        }
+      }
       const actionList = this.$store.getters.getActionList
       actionList.splice(this.actionIndex, 1, {
         'NAME': this.actionName,

@@ -242,6 +242,11 @@ export default {
       handler: function () {
         if (this.$store.getters.getWebLocation) {
           this.elementLocation = this.$store.getters.getWebLocation
+        } else {
+          this.elementLocation = {
+            x: null,
+            y: null
+          }
         }
       },
       immediate: true,
@@ -504,10 +509,8 @@ export default {
     clearXpath(event) {
       if (event === "" || event === null) {
         this.$store.commit("setSelectedElementXpath", event)
+        this.$store.commit("setWebLocation", null)
       }
-    },
-    updateActionList() {
-      this.actionList = this.$store.getters.getActionList
     },
     testXpath() {
       this.python.doWebFuncTest({
