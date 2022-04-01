@@ -76,10 +76,14 @@ export default {
       return this.$store.getters.getCustomizeLocation
     },
     elementLocation() {
-      if (this.useCustomizeLocation) {
-        return this.customizeLocation
+      if (this.func.includes('iframe')) {
+        return this.$store.getters.getIframe
       } else {
-        return this.$store.getters.getSelectedElement
+        if (this.useCustomizeLocation) {
+          return this.customizeLocation
+        } else {
+          return this.$store.getters.getSelectedElement
+        }
       }
     },
     funcList() {
@@ -116,7 +120,16 @@ export default {
       const temp = Object.assign({}, data)
       this.actionName = temp.NAME
       this.func = temp.TYPE
-      this.funcParams = temp.DATA
+      const dataFuncParams = temp.DATA
+      const funcParams = this.funcMap[this.func]
+      for (const index in funcParams.params) {
+        const funcParamsKey = funcParams.params[index]
+        if (Object.keys(dataFuncParams).includes(funcParamsKey)) {
+          this.funcParams[funcParamsKey] = dataFuncParams[funcParamsKey]
+        } else {
+          this.funcParams[funcParamsKey] = null
+        }
+      }
       if (Object.keys(this.funcParams).includes("location")) {
         this.editLocation = data.DATA.location
       }
@@ -146,10 +159,14 @@ export default {
         this.funcParams.params = funcSelect.getFuncParams()
       }
       if (this.funcData.params.includes("location")) {
-        if (this.useCustomizeLocation) {
-          this.funcParams.location = this.customizeLocation
+        if (this.func.includes('iframe')) {
+          this.funcParams.location = this.$store.getters.getIframe
         } else {
-          this.funcParams.location = this.$store.getters.getSelectedElement
+          if (this.useCustomizeLocation) {
+            this.funcParams.location = this.customizeLocation
+          } else {
+            this.funcParams.location = this.$store.getters.getSelectedElement
+          }
         }
       }
       for (const i in this.funcData.params) {

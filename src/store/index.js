@@ -49,7 +49,8 @@ const store = new Vuex.Store({
         sessionId: null,
         driverUrl: null,
         webXpath: null,
-        webLocation: null
+        webLocation: null,
+        iframe: null
     },
     getters: {
         getDeviceUrl: state => state.deviceUrl,
@@ -96,7 +97,8 @@ const store = new Vuex.Store({
         getDriverUrl: state => state.driverUrl,
         getSessionId: state => state.sessionId,
         getWebXpath: state => state.webXpath,
-        getWebLocation: state => JSON.parse(state.webLocation)
+        getWebLocation: state => JSON.parse(state.webLocation),
+        getIframe: state => state.iframe
     },
     mutations: {
         setDeviceUrl(state, data) {
@@ -216,6 +218,9 @@ const store = new Vuex.Store({
         },
         setWebLocation(state, data) {
             state.webLocation = data
+        },
+        setIframe(state, data) {
+            state.iframe = data
         }
     },
     modules: {},

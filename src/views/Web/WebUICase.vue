@@ -3,13 +3,19 @@
     <div style="color: black;text-align: left"><code>元素定位:</code></div>
     <el-input size="mini" v-model="elementXpath" clearable @change="clearXpath"></el-input>
     <el-row style="color: black;;text-align: left">
-      <el-col :span="4"><code>鼠标点击坐标:</code></el-col>
-      <el-col :span="10"><code>x: {{ elementLocation.x }}</code></el-col>
-      <el-col :span="10"><code>y: {{ elementLocation.y }}</code></el-col>
+      <el-col :span="6"><code>鼠标点击坐标:</code></el-col>
+      <el-col :span="9"><code>x: {{ elementLocation.x }}</code></el-col>
+      <el-col :span="9"><code>y: {{ elementLocation.y }}</code></el-col>
+    </el-row>
+    <el-row style="color: black;;text-align: left">
+      <el-col :span="4"><code>iframe:</code></el-col>
+      <el-col :span="20">
+        <el-input size="mini" v-model="iframeXpath" clearable @change="clearIframeXpath"></el-input>
+      </el-col>
     </el-row>
     <el-row>
       <el-button size="mini" type="info" style="text-align: left" @click="saveXpath()">保存自定义Xpath</el-button>
-      <el-button size="mini" type="warning" style="text-align: left" @click="testXpath()">Xpath测试</el-button>
+      <el-button size="mini" type="warning" style="text-align: left" @click="testXpath()">元素Xpath测试</el-button>
     </el-row>
     <el-collapse>
       <el-collapse-item title="基础设置">
@@ -211,7 +217,8 @@ export default {
       elementLocation: {
         x: null,
         y: null
-      }
+      },
+      iframeXpath: null
     }
   },
   created() {
@@ -248,6 +255,13 @@ export default {
             y: null
           }
         }
+      },
+      immediate: true,
+      deep: true
+    },
+    '$store.state.iframe': {
+      handler: function () {
+        this.iframeXpath = this.$store.getters.getIframe
       },
       immediate: true,
       deep: true
@@ -504,12 +518,18 @@ export default {
     },
     saveXpath() {
       this.$store.commit("setSelectedElementXpath", this.elementXpath)
+      this.$store.commit("setIframe", this.iframeXpath)
       message("保存自定义路径成功!")
     },
     clearXpath(event) {
       if (event === "" || event === null) {
         this.$store.commit("setSelectedElementXpath", event)
         this.$store.commit("setWebLocation", null)
+      }
+    },
+    clearIframeXpath(event) {
+      if (event === "" || event === null) {
+        this.$store.commit("setIframe", event)
       }
     },
     testXpath() {

@@ -148,9 +148,10 @@ export default {
     socketConnect() {
       this.socket = io("http://0.0.0.0:8888")
       this.socket.on(this.selected, (data) => {
-        console.log(data.xpath)
+        console.log(data)
         this.$store.commit("setSelectedElementXpath", data.xpath)
         this.$store.commit("setWebLocation", JSON.stringify(data.location))
+        this.$store.commit("setIframe", data.iframe)
       })
       this.socket.on("disconnect", (reason) => {
         console.log(reason)
