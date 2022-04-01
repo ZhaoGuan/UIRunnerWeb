@@ -121,15 +121,17 @@ export default {
       this.actionName = temp.NAME
       this.func = temp.TYPE
       const dataFuncParams = temp.DATA
-      const funcParams = this.funcMap[this.func]
-      for (const index in funcParams.params) {
-        const funcParamsKey = funcParams.params[index]
+      const funcParams = this.funcMap[this.func].params
+      const funcParamsData = {}
+      for (const index in funcParams) {
+        const funcParamsKey = funcParams[index]
         if (Object.keys(dataFuncParams).includes(funcParamsKey)) {
-          this.funcParams[funcParamsKey] = dataFuncParams[funcParamsKey]
+          funcParamsData[funcParamsKey] = dataFuncParams[funcParamsKey]
         } else {
-          this.funcParams[funcParamsKey] = null
+          funcParamsData[funcParamsKey] = null
         }
       }
+      this.funcParams = funcParamsData
       if (Object.keys(this.funcParams).includes("location")) {
         this.editLocation = data.DATA.location
       }
