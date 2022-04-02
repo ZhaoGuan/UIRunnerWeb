@@ -48,6 +48,8 @@ import {message} from "@/utils/tools";
 import WebUICase from "@/views/Web/WebUICase"
 import {Python} from "@/utils/doPython";
 import {io} from "socket.io-client"
+import devEnv from '@/config/dev.env'
+import proEnv from '@/config/pro.env'
 
 export default {
   name: "Web",
@@ -146,7 +148,16 @@ export default {
       })
     },
     socketConnect() {
-      this.socket = io("http://0.0.0.0:8888")
+      let baseUrl = null
+      switch (process.env.NODE_ENV) {
+        case 'development':
+          baseUrl = devEnv.baseurl;
+          break;
+        case 'production':
+          baseUrl = proEnv.baseurl; //打包完路径
+          break;
+      }
+      this.socket = io(baseUrl)
       this.socket.on(this.selected, (data) => {
         console.log(data)
         this.$store.commit("setSelectedElementXpath", data.xpath)
