@@ -98,8 +98,8 @@ Python.generatePreloadCode = function () {
         }
         codeLines = [
             "import os",
-            "from mobile.mobile_driver import MobileDriver",
-            "from mobile.mobile_customize_action import MobileCustomize",
+            "from action.mobile.mobile_driver import MobileDriver",
+            "from action.mobile.mobile_customize_action import MobileCustomize",
             md,
             "d = md()",
             "action = MobileCustomize(d)",
@@ -107,8 +107,8 @@ Python.generatePreloadCode = function () {
     } else if (m[1] === "android") {
         codeLines = [
             "import os",
-            "from mobile.mobile_driver import MobileDriver",
-            "from mobile.mobile_customize_action import MobileCustomize",
+            "from action.common.mobile_driver import MobileDriver",
+            "from action.mobile.mobile_customize_action import MobileCustomize",
             `md = MobileDriver("android","${deviceUrl}")`,
             "d = md()",
             "action = MobileCustomize(d)",
@@ -281,8 +281,8 @@ Python.webDriverConnect = function (driverUrl, sessionId) {
     let codeLines;
     codeLines = [
         "import os",
-        "from common.remote_driver import session_driver",
-        "from web.selenium_customize_action import WebCustomize",
+        "from action.common.web_remote_driver import session_driver",
+        "from action.web.selenium_customize_action import WebCustomize",
         `driver = session_driver("${driverUrl}","${sessionId}")`,
         "driver.maximize_window()",
         "action = WebCustomize(driver)",
