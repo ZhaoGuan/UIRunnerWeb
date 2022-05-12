@@ -98,7 +98,7 @@ Python.generatePreloadCode = function () {
         }
         codeLines = [
             "import os",
-            "from action.mobile.mobile_driver import MobileDriver",
+            "from action.common.mobile_driver import MobileDriver",
             "from action.mobile.mobile_customize_action import MobileCustomize",
             md,
             "d = md()",

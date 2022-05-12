@@ -45,7 +45,7 @@
         </el-select>
       </el-col>
       <el-col v-if="deviceFrom==='local'" :span="1">
-        <el-button icon="el-icon-refresh-left" size="mini" type="success" @click="toGetLocalDevices"/>
+        <el-button icon="el-icon-refresh-left" size="mini" type="success" @click="toGetNorRunDevices"/>
       </el-col>
       <el-col :span="2">
         <el-button size="mini" @click="doConnect" style="width:100%"
@@ -107,9 +107,11 @@
 </template>
 
 <script>
-import {connect, getLocalDevices} from "@/api/ui"
+import {connect, getNotRunDevices, setDeviceStatus} from "@/api/ui"
 import {Python} from "@/utils/doPython";
 import {message} from "@/utils/tools";
+
+const {checkDeviceRunning} = require("@/api/ui");
 
 export default {
   name: "DeviceHeader",
@@ -124,6 +126,7 @@ export default {
       deviceList: [],
       deviceMapping: {},
       localDeviceId: null,
+      oldLocalDeviceId: null,
       platform: this.$store.getters.getPlatform,
       ScreenUrl: this.$store.getters.getScreenUrl,
       iosScreenUrl: this.$store.getters.getBaseIosScreenUrl,
@@ -139,7 +142,6 @@ export default {
         this.python.initPythonWebSocket()
         setTimeout(() => this.python.runPython(this.python.generatePreloadCode()), 2000)
       }
-
     },
     platform: function (event) {
       this.$store.commit("setPlatform", event)
@@ -148,7 +150,7 @@ export default {
     deviceFrom: function (event) {
       if (event === "local") {
         this.serial = null
-        this.toGetLocalDevices()
+        this.toGetNorRunDevices()
       } else {
         this.localDeviceId = null
         this.platform = this.$store.getters.getPlatform
@@ -156,18 +158,8 @@ export default {
         this.iosScreenUrl = this.$store.getters.getBaseIosScreenUrl
       }
     },
-    localDeviceId: function (event) {
-      if (event !== null) {
-        const deviceData = this.deviceMapping[this.localDeviceId]
-        if (deviceData.device_type === 'android') {
-          this.platform = "Android"
-          this.serial = `${deviceData.host}:${deviceData.udid}`
-        } else {
-          this.platform = 'iOS'
-          this.serial = deviceData.udid_data.wda_url
-          this.iosScreenUrl = deviceData.udid_data.screen_url
-        }
-      }
+    localDeviceId: function (value, old) {
+      this.toCheckDeviceRunning(old, value)
     },
     deviceId: function (event) {
       this.$store.commit("setDeviceId", event)
@@ -198,14 +190,20 @@ export default {
   },
   created() {
   },
+  beforeDestroy() {
+    if (this.localDeviceId) {
+      this.toSetDeviceStata(this.localDeviceId, false)
+    }
+    this.python.ws.close()
+  },
   computed: {
     loading() {
       return this.$store.getters.getLoading
     },
   },
   methods: {
-    toGetLocalDevices() {
-      getLocalDevices().then(response => {
+    toGetNorRunDevices() {
+      getNotRunDevices().then(response => {
         if (response.code === 20000) {
           this.deviceList = response.data
           this.deviceMapping = {}
@@ -218,6 +216,7 @@ export default {
       })
     },
     doConnect() {
+      // TODO 设备被使用 准备使用socketIo 其实http接口就好 页面销毁 更换设备连接的时候都要 取消设备状态
       this.python.initPythonWebSocket()
       setTimeout(() => this.python.runPython(this.python.generatePreloadCode()), 2000)
       this.$store.commit("setLoading", true)
@@ -225,6 +224,10 @@ export default {
         deviceUrl: this.serial,
         platform: this.platform
       }).then((ret) => {
+        if (this.oldLocalDeviceId) {
+          this.toSetDeviceStata(this.oldLocalDeviceId, false)
+        }
+        this.toSetDeviceStata(this.localDeviceId, true)
         const deviceId = ret.data.deviceId
         this.$store.commit("setDeviceId", deviceId)
         this.screenWebSocketUrl = ret.data.screenWebSocketUrl
@@ -250,6 +253,7 @@ export default {
         ]
         this.python.runPython(this.python.generatePreloadCode())
         this.dumpHierarchyWithScreen()
+        this.toGetNorRunDevices()
       })
     },
     dumpHierarchyWithScreen() {
@@ -285,6 +289,30 @@ export default {
     },
     iosLiveScreen() {
       this.$store.commit("setIosScreenUrl", this.iosScreenUrl + '?random=' + Math.random())
+    },
+    toSetDeviceStata(duid, setStatus) {
+      setDeviceStatus({
+        duid: duid,
+        status: setStatus
+      })
+    },
+    toCheckDeviceRunning(old, value) {
+      checkDeviceRunning({duid: this.localDeviceId}).then(res => {
+        if (res.code === 20000) {
+          this.oldLocalDeviceId = old
+          if (value !== null) {
+            const deviceData = this.deviceMapping[this.localDeviceId]
+            if (deviceData.device_type === 'android') {
+              this.platform = "Android"
+              this.serial = `${deviceData.host}:${deviceData.udid}`
+            } else {
+              this.platform = 'iOS'
+              this.serial = deviceData.udid_data.wda_url
+              this.iosScreenUrl = deviceData.udid_data.screen_url
+            }
+          }
+        }
+      })
     }
   }
 }

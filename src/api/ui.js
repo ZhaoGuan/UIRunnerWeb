@@ -50,10 +50,26 @@ export function taskResult(taskId) {
     })
 }
 
-export function getLocalDevices() {
+export function getNotRunDevices() {
     return request({
-        url: '/devices/all',
+        url: '/devices/all_not_running',
         method: 'get',
+    })
+}
+
+export function setDeviceStatus(request_body) {
+    return request({
+        url: '/devices/set_run',
+        method: 'post',
+        data: request_body
+    })
+}
+
+export function checkDeviceRunning(request_body) {
+    return request({
+        url: '/devices/check_running',
+        method: 'post',
+        data: request_body
     })
 }
 
