@@ -111,3 +111,51 @@ export function getDockerDriverScreen(dockerName) {
         params: {dockerName}
     })
 }
+
+export function getCaseTree() {
+    return request({
+        url: '/case/tree',
+        method: 'get',
+    })
+}
+
+export function renameCaseTree(body) {
+    return request({
+        url: '/case/tree',
+        method: 'put',
+        data: body
+    })
+}
+
+export function createCaseDir(body) {
+    return request({
+        url: '/case/dir',
+        method: 'post',
+        data: body
+    })
+}
+
+export function deleteCase(body) {
+    return request({
+        url: '/case',
+        method: 'delete',
+        data: body
+    })
+}
+
+
+export function ignoreCases(body) {
+    return request({
+        url: '/case/ignore',
+        method: 'post',
+        data: body
+    })
+}
+
+export function unIgnoreCases(body) {
+    return request({
+        url: '/case/ignore',
+        method: 'delete',
+        data: body
+    })
+}

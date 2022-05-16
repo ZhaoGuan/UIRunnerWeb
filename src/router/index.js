@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Device from "@/views/Mobile/Device";
 import Web from "@/views/Web/Web"
+import Cases from "@/views/Cases/Cases"
 
 Vue.use(VueRouter)
 
@@ -23,6 +24,16 @@ const routes = [
         meta: {
             icon: 'el-icon-discover',
             title: 'WEB',
+            hide: false
+        },
+    },
+    {
+        path: '/cases',
+        name: 'cases',
+        component: Cases,
+        meta: {
+            icon: 'el-icon-folder',
+            title: '用例',
             hide: false
         },
     },
