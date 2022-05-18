@@ -40,8 +40,9 @@
           <el-button type="success" :size="formItemSize" @click="androidSetOrientation">
             旋转屏幕
           </el-button>
+          <el-button type="info" :size="formItemSize" @click="$refs.fileCaseSelect.caseTreeDialog=true">选择用例</el-button>
           <el-upload action="" :auto-upload="false" :on-change="loadYamlCase" accept=".yaml" :show-file-list="false">
-            <el-button type="info" :size="formItemSize">导入用例</el-button>
+            <el-button type="info" :size="formItemSize">本地导入用例</el-button>
           </el-upload>
         </el-form-item>
       </el-form>
@@ -141,9 +142,9 @@
                        @click="actionDown(scope.row)">
             </el-button>
             <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
-<!--            <el-button size="mini" type="success"-->
-<!--                       @click="editAction(scope.row,scope.$index)">EDIT-->
-<!--            </el-button>-->
+            <!--            <el-button size="mini" type="success"-->
+            <!--                       @click="editAction(scope.row,scope.$index)">EDIT-->
+            <!--            </el-button>-->
             <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -152,6 +153,9 @@
         <el-button :disabled="show" type="success" size="mini" @click="yamlCase">生成YML用例
         </el-button>
         <el-button :disabled="show" type="danger" size="mini" @click="runCase">运行</el-button>
+        <el-button :disabled="show" type="success" size="mini"
+                   @click="getCase() ? $refs.fileCaseSave.saveCaseDialog=true:false">保存
+        </el-button>
       </el-row>
       <div v-if="debugTaskResult">
         <el-table
@@ -177,9 +181,10 @@
           </el-table-column>
         </el-table>
       </div>
-
     </el-collapse-item>
     <funcDialog ref="funcDialog"/>
+    <fileCaseSelect ref="fileCaseSelect" case-type="mobile"/>
+    <fileCaseSave ref="fileCaseSave"/>
   </el-collapse>
 </template>
 
@@ -189,10 +194,13 @@ import funcDialog from "../components/funcDialog"
 import {message} from "@/utils/tools";
 import {caseTest, taskResult} from "@/api/ui";
 import ScreenTool from "@/views/components/screenTool"
+import fileCaseSelect from "@/views/components/fileCaseSelect"
+import fileCaseSave from "@/views/components/fileCaseSave"
+
 
 export default {
   name: "UICase",
-  components: {funcDialog, ScreenTool,},
+  components: {funcDialog, ScreenTool, fileCaseSelect, fileCaseSave},
   data() {
     return {
       platform: this.$store.getters.getPlatform.toUpperCase(),
@@ -241,6 +249,29 @@ export default {
     }
   },
   created() {
+    this.template = {
+      'TITLE': null,
+      'DESCRIPTION': null,
+      'TYPE': "WEB",
+      'DESIRED_CAPS':
+          {
+            'URL': '',
+            'appPackage': 'com.pplingo.chinese',
+            'appActivity': 'com.example.connectapp.MainActivity',
+            'deviceName': null,
+            'passWord': 888888,
+            'performance': false,
+            'perfHost': "ip",
+          },
+      'ALERT_CLOSE_ELEMENTS': [],
+      'ORIENTATION': null,
+      'ACTIONS': []
+    }
+  },
+  beforeDestroy() {
+    this.$store.commit('setCaseBaseData', null)
+    this.$store.commit("setActionList", [])
+    this.$store.commit("setAlertClose", [])
   },
   mounted() {
     this.debugTaskTimer = setInterval(this.getDebugTaskResult, 5000)
@@ -258,6 +289,24 @@ export default {
     },
     '$store.state.actionList': function () {
       this.actionList = this.$store.getters.getActionList
+    },
+    '$store.state.caseBaseData': {
+      handler: function () {
+        const data = this.$store.getters.getCaseBaseData
+        if (data !== null) {
+          this.template.TITLE = data.TITLE
+          this.template.DESCRIPTION = data.DESCRIPTION
+          this.template.ORIENTATION = data.ORIENTATION
+          if (this.platform && data.TYPE !== this.platform) {
+            message('设备类型不一致', '所选用例和当年设备类型不一致')
+          }
+          this.template.TYPE = data.TYPE
+          this.template.DESIRED_CAPS.appPackage = data.DESIRED_CAPS.appPackage
+          this.template.DESIRED_CAPS.appActivity = data.DESIRED_CAPS.appActivity
+        }
+      },
+      immediate: true,
+      deep: true
     },
   },
   computed: {
@@ -440,7 +489,6 @@ export default {
     },
     yamlCase() {
       const caseResult = this.getCase()
-      console.log(caseResult)
       if (!caseResult) {
         return
       }

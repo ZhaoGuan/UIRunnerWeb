@@ -91,6 +91,9 @@ export default {
     this.doGetChromeList()
   },
   destroyed() {
+    if (this.python.ws) {
+      this.python.ws.close()
+    }
     if (this.socket !== null) {
       this.socket.disconnect()
     }

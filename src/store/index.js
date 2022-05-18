@@ -38,6 +38,7 @@ const store = new Vuex.Store({
         funDocList: null,
         tapPoint: null,
         actionList: [],
+        caseBaseData: null,
         mouseHoverLock: false,
         alertClose: [],
         customizeLocation: null,
@@ -86,6 +87,7 @@ const store = new Vuex.Store({
         getFuncDocList: state => state.funDocList,
         getTapPoint: state => state.tapPoint,
         getActionList: state => state.actionList,
+        getCaseBaseData: state => state.caseBaseData,
         getMouseHoverLock: state => state.mouseHoverLock,
         getAlertClose: state => state.alertClose,
         getSaveAlertClose: state => state.saveAlertClose,
@@ -182,6 +184,9 @@ const store = new Vuex.Store({
         },
         setActionList(state, data) {
             state.actionList = data
+        },
+        setCaseBaseData(state, data) {
+            state.caseBaseData = data
         },
         setMouseHoverLock(state, data) {
             state.mouseHoverLock = data

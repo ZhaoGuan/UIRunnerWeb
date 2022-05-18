@@ -32,7 +32,6 @@ import nodeDetail from "@/views/Mobile/nodeDetail"
 import DeviceHeader from "@/views/Mobile/header"
 import UICase from "@/views/Mobile/UICase"
 
-
 export default {
   name: "Device",
   components: {

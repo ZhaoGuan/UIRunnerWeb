@@ -32,8 +32,10 @@
           <el-form-item>
             <el-button :disabled="show" type="success" :size="formItemSize" @click="getUrl">访问地址</el-button>
             <el-button type="success" :size="formItemSize" @click="clearTemplate">清空设置</el-button>
+            <el-button type="info" :size="formItemSize" @click="$refs.fileCaseSelect.caseTreeDialog=true">选择用例
+            </el-button>
             <el-upload action="" :auto-upload="false" :on-change="loadYamlCase" accept=".yaml" :show-file-list="false">
-              <el-button type="info" :size="formItemSize">导入用例</el-button>
+              <el-button type="info" :size="formItemSize">本地导入用例</el-button>
             </el-upload>
           </el-form-item>
         </el-form>
@@ -131,6 +133,9 @@
           <el-button :disabled="show" type="success" size="mini" @click="yamlCase">生成YML用例
           </el-button>
           <el-button :disabled="show" type="danger" size="mini" @click="runCase">运行</el-button>
+          <el-button :disabled="show" type="success" size="mini"
+                     @click="getCase() ? $refs.fileCaseSave.saveCaseDialog=true:false">保存
+          </el-button>
           <el-button v-if="debugTaskResult" type="danger" size="mini" @click="debugTaskResult=null">清空结果数据</el-button>
         </el-row>
         <div v-if="debugTaskResult">
@@ -160,6 +165,8 @@
       </el-collapse-item>
     </el-collapse>
     <funcDialog ref="funcDialog"/>
+    <fileCaseSelect ref="fileCaseSelect" case-type="web"/>
+    <fileCaseSave ref="fileCaseSave"/>
   </div>
 </template>
 
@@ -169,10 +176,13 @@ import funcDialog from "../components/funcDialog"
 import {message} from "@/utils/tools";
 import {caseTest, taskResult} from "@/api/ui";
 import ScreenTool from "@/views/components/screenTool"
+import fileCaseSelect from "@/views/components/fileCaseSelect"
+import fileCaseSave from "@/views/components/fileCaseSave"
+
 
 export default {
   name: "WebUICase",
-  components: {funcDialog, ScreenTool,},
+  components: {funcDialog, ScreenTool, fileCaseSelect, fileCaseSave},
   data() {
     return {
       actionList: this.$store.getters.getActionList,
@@ -222,6 +232,20 @@ export default {
     }
   },
   created() {
+    this.template = {
+      'TITLE': null,
+      'DESCRIPTION': null,
+      'TYPE': "WEB",
+      'DESIRED_CAPS':
+          {
+            'URL': null,
+            'SESSION_ID': null,
+            'DRIVER_URL': null
+          },
+      'ALERT_CLOSE_ELEMENTS': [],
+      'ORIENTATION': null,
+      'ACTIONS': []
+    }
   },
   mounted() {
     this.debugTaskTimer = setInterval(this.getDebugTaskResult, 5000)
@@ -266,6 +290,25 @@ export default {
       immediate: true,
       deep: true
     },
+    '$store.state.caseBaseData': {
+      handler: function () {
+        const data = this.$store.getters.getCaseBaseData
+        if (data !== null) {
+          this.template.TITLE = data.TITLE
+          this.template.DESCRIPTION = data.DESCRIPTION
+          this.template.ORIENTATION = data.ORIENTATION
+          this.template.TYPE = data.TYPE
+          this.template.DESIRED_CAPS.URL = data.DESIRED_CAPS.URL
+        }
+      },
+      immediate: true,
+      deep: true
+    },
+  },
+  beforeDestroy() {
+    this.$store.commit('setCaseBaseData', null)
+    this.$store.commit("setActionList", [])
+    this.$store.commit("setAlertClose", [])
   },
   computed: {
     show() {

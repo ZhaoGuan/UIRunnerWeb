@@ -127,9 +127,41 @@ export function renameCaseTree(body) {
     })
 }
 
+export function getCaseDir() {
+    return request({
+        url: '/case/dir',
+        method: 'get',
+    })
+}
+
 export function createCaseDir(body) {
     return request({
         url: '/case/dir',
+        method: 'post',
+        data: body
+    })
+}
+
+
+export function checkCaseExists(path) {
+    return request({
+        url: '/case/exists-check',
+        method: 'get',
+        params: {path}
+    })
+}
+
+export function getCaseData(path) {
+    return request({
+        url: '/case',
+        method: 'get',
+        params: {path}
+    })
+}
+
+export function saveCaseData(body) {
+    return request({
+        url: '/case',
         method: 'post',
         data: body
     })

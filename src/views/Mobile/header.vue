@@ -194,7 +194,9 @@ export default {
     if (this.localDeviceId) {
       this.toSetDeviceStata(this.localDeviceId, false)
     }
-    this.python.ws.close()
+    if (this.python.ws) {
+      this.python.ws.close()
+    }
   },
   computed: {
     loading() {
