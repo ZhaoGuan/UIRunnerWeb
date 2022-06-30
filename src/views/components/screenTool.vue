@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="图像识别" :visible.sync="screenToolDialog" width="80%" @close="clearDialog">
+  <el-dialog title="图像识别" :visible.sync="screenToolDialog" width="80%" :close-on-click-modal="false" @close="clearDialog">
     <div>
       <el-row>
         <el-button @click="reFlashScreen" size="mini" icon="el-icon-refresh" type="info">刷新</el-button>
