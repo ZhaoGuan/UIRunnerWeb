@@ -132,20 +132,35 @@
         <el-table-column
             prop="TYPE"
             label="方法"
+            width="150"
         />
-        <el-table-column label="操作" width="250">
+        <el-table-column label="操作" width="200">
           <template slot-scope="scope">
-            <el-button size="mini" icon="el-icon-arrow-up"
-                       @click="actionUp(scope.row)">
-            </el-button>
-            <el-button size="mini" icon="el-icon-arrow-down"
-                       @click="actionDown(scope.row)">
-            </el-button>
-            <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
-            <!--            <el-button size="mini" type="success"-->
-            <!--                       @click="editAction(scope.row,scope.$index)">EDIT-->
-            <!--            </el-button>-->
-            <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
+            <el-row type="flex" justify="center">
+              <el-col :span="12">
+                <el-button size="mini" icon="el-icon-arrow-up"
+                           @click="actionUp(scope.row)">
+                </el-button>
+              </el-col>
+              <el-col :span="12" style="text-align: right">
+                <el-button size="mini" icon="el-icon-arrow-down"
+                           @click="actionDown(scope.row)">
+                </el-button>
+              </el-col>
+            </el-row>
+            <el-row type="flex" justify="center">
+              <el-col :span="8">
+                <el-button size="mini" type="info" style="width: 100%" @click="funcTest(scope.row)">测试</el-button>
+              </el-col>
+              <el-col :span="8">
+                <el-button size="mini" type="success" style="width: 100%"
+                           @click="editAction(scope.row,scope.$index)">编辑
+                </el-button>
+              </el-col>
+              <el-col :span="8">
+                <el-button size="mini" type="danger" style="width: 100%" @click="deleteAction(scope.row)">删除</el-button>
+              </el-col>
+            </el-row>
           </template>
         </el-table-column>
       </el-table>
@@ -298,7 +313,7 @@ export default {
           this.template.DESCRIPTION = data.DESCRIPTION
           this.template.ORIENTATION = data.ORIENTATION
           if (this.platform && data.TYPE !== this.platform) {
-            message('设备类型不一致', '所选用例和当年设备类型不一致')
+            message('设备类型不一致', '所选用例和当前设备类型不一致')
           }
           this.template.TYPE = data.TYPE
           this.template.DESIRED_CAPS.appPackage = data.DESIRED_CAPS.appPackage

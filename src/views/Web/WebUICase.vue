@@ -105,26 +105,32 @@
               prop="TYPE"
               label="方法"
           />
-          <el-table-column label="操作" width="250">
+          <el-table-column label="操作" width="200">
             <template slot-scope="scope">
               <el-row type="flex" justify="center">
-                <el-col :span="12" style="text-align:center">
+                <el-col :span="12">
                   <el-button size="mini" icon="el-icon-arrow-up"
                              @click="actionUp(scope.row)">
                   </el-button>
                 </el-col>
-                <el-col :span="12" style="text-align:center">
+                <el-col :span="12" style="text-align:right">
                   <el-button size="mini" icon="el-icon-arrow-down"
                              @click="actionDown(scope.row)">
                   </el-button>
                 </el-col>
               </el-row>
               <el-row style="text-align:center">
-                <el-button size="mini" type="info" @click="funcTest(scope.row)">测试</el-button>
-                <el-button size="mini" type="success"
-                           @click="editAction(scope.row,scope.$index)">修改
-                </el-button>
-                <el-button size="mini" type="danger" @click="deleteAction(scope.row)">删除</el-button>
+                <el-col :span="8">
+                  <el-button size="mini" type="info" style="width: 100%" @click="funcTest(scope.row)">测试</el-button>
+                </el-col>
+                <el-col :span="8">
+                  <el-button size="mini" type="success" style="width: 100%"
+                             @click="editAction(scope.row,scope.$index)">编辑
+                  </el-button>
+                </el-col>
+                <el-col :span="8">
+                  <el-button size="mini" type="danger" style="width: 100%" @click="deleteAction(scope.row)">删除</el-button>
+                </el-col>
               </el-row>
             </template>
           </el-table-column>
