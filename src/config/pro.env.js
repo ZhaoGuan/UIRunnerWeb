@@ -2,5 +2,5 @@
 module.exports = {
     NODE_ENV: '"production"',
     baseurl: location.protocol + "//" + location.host,
-    baseVncWsUrl: "ws://" + location.host + ":6080",
+    baseVncWsUrl: "ws://" + location.host.replace(":8888", "") + ":6080",
 };
