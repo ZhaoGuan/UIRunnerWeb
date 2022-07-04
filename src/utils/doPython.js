@@ -1,5 +1,5 @@
 import {alertMessage, message} from "@/utils/tools";
-import store from "@/store";
+// import store from "@/store";
 
 export const Python = {}
 
