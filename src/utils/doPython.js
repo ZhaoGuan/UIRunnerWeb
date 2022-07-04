@@ -68,7 +68,8 @@ Python.initPythonWebSocket = function () {
         const data = JSON.parse(messageData.data)
         this.pyshell.running = false
         console.log("Python Run", data)
-        if (data.status === "SUCCESS" && store.getters.getDeviceType !== "web") {
+        // if (data.status === "SUCCESS" && store.getters.getDeviceType !== "web") {
+        if (data.status === "SUCCESS") {
             message("操作执行成功", "请等待页面刷新!")
             this.callBack()
         }
